@@ -1,0 +1,22 @@
+commit fdbe2e51a82fad949d7e303cb0e8efedded1420b
+Author: tomlv <yvo.hcm@gmail.com>
+Date:   Mon Feb 24 23:14:55 2014 +0700
+
+    Add I2C0 node to dtb
+
+diff --git a/arch/arm/boot/dts/armada-xp-mamba.dts b/arch/arm/boot/dts/armada-xp-mamba.dts
+index af5eb14..cf666b3 100644
+--- a/arch/arm/boot/dts/armada-xp-mamba.dts
++++ b/arch/arm/boot/dts/armada-xp-mamba.dts
+@@ -132,6 +132,11 @@
+ 				phy-mode = "rgmii-id";
+ 			};
+ 
++			i2c@11000 {
++                                status = "okay";
++                                clock-frequency = <175000>;
++                        };
++
+ 			nand@d0000 {
+ 				status = "okay";
+ 				num-cs = <1>;
