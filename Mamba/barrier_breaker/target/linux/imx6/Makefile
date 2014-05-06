@@ -9,12 +9,12 @@ include $(TOPDIR)/rules.mk
 ARCH:=arm
 BOARD:=imx6
 BOARDNAME:=Freescale i.MX 6 Series
-FEATURES:=audio display gpio pcie rtc usb usbgadget squashfs targz ubifs
+FEATURES:=audio display fpu gpio pcie rtc usb usbgadget squashfs targz ubifs
 CPU_TYPE:=cortex-a9
-CPU_SUBTYPE:=vfpv3
+CPU_SUBTYPE:=neon
 MAINTAINER:=Luka Perkov <luka@openwrt.org>
 
-LINUX_VERSION:=3.10.28
+LINUX_VERSION:=3.10.32
 
 include $(INCLUDE_DIR)/target.mk
 

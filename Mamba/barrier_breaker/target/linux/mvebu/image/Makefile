@@ -8,7 +8,8 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
 TARGET_DTBS := armada-xp-db armada-370-db armada-xp-openblocks-ax3-4 armada-370-mirabox \
-		armada-370-rd armada-xp-gp armada-xp-mamba
+		armada-370-rd armada-xp-gp
+
 ifeq ($(SUBTARGET),mamba)
 TARGET_DTBS := armada-xp-mamba
 JFFS2OPTS += --no-cleanmarkers
@@ -88,7 +89,6 @@ endef
 endif # SUBTARGET == mamba
 
 define Image/Build
-	echo "call to Image/Build/$(1)"
 	$(call Image/Build/$(1))
 	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) bs=128k conv=sync
 ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)

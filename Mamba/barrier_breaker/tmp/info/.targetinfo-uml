@@ -1,0 +1,19 @@
+Source-Makefile: target/linux/uml/Makefile
+Target: uml
+Target-Board: uml
+Target-Name: User Mode Linux
+Target-Path: /media/disk100/mamba/from_ftp_server/mamba-openwrt-v4.3_rc
+Target-Arch: i386
+Target-Arch-Packages: uml
+Target-Features: audio ext4
+Target-Depends: 
+Target-Optimization: -Os -pipe -march=i486
+CPU-Type: i486
+Linux-Version: 3.8.13
+Linux-Release: 1
+Linux-Kernel-Arch: um
+Target-Description:
+
+@@
+Default-Packages: base-files libc libgcc busybox dropbear mtd uci opkg netifd fstools dnsmasq iptables ip6tables ppp ppp-mod-pppoe kmod-ipt-nathelper firewall odhcpd odhcp6c wpad-mini kmod-mac80211-hwsim iwinfo
+

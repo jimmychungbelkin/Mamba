@@ -1,0 +1,17 @@
+Source-Makefile: package/network/mrvl_wlan_v7drv/Makefile
+Package: mrvl_wlan_v7drv
+Version: 1.0
+Depends: +libc +USE_EGLIBC:librt +USE_EGLIBC:libpthread 
+Menu-Depends: 
+Provides: 
+Section: net
+Category: Network
+Title: Marvell 88E6172 driver, hostapd for Marvell
+Maintainer: Belkin Inc.
+Source: 
+Type: ipkg
+Description:  This package contains Marvell wifi driver and scripts
+Belkin Inc.
+@@
+
+

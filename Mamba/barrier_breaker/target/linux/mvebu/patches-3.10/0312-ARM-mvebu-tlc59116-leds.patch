@@ -1,27 +1,22 @@
-commit 30c09531a329797ac6d9d6427c5b414b5e22f1b8
-Author: tomlv <yvo.hcm@gmail.com>
-Date:   Thu Mar 6 23:50:56 2014 +0700
-
-    Support TLC59116 LED
-
 diff --git a/arch/arm/boot/dts/armada-xp-mamba.dts b/arch/arm/boot/dts/armada-xp-mamba.dts
-index d628575..280dff5 100644
+index ef8e7b0..5a88f1e 100644
 --- a/arch/arm/boot/dts/armada-xp-mamba.dts
 +++ b/arch/arm/boot/dts/armada-xp-mamba.dts
-@@ -125,6 +125,13 @@
- 			i2c@11000 {
-                                 status = "okay";
-                                 clock-frequency = <175000>;
-+
+@@ -127,7 +127,13 @@
+ 				status = "okay";
+ 				clock-frequency = <175000>;
+ 
+-			};
 +				tlc59116@68 {
 +                                          #gpio-cells = <2>;
 +                                          compatible = "gpio,tlc59116";
 +                                          reg = <0x68>;
 +                                          gpio-controller;
 +                                };
-                         };
++                        };
  
  			nand@d0000 {
+ 				status = "okay";
 diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
 index ef99229..57b9169 100644
 --- a/drivers/leds/Kconfig
@@ -61,9 +56,9 @@ index 0000000..ec975a0
 +++ b/drivers/leds/leds-tlc59116.c
 @@ -0,0 +1,498 @@
 +/*
-+ * Copyright 2014 Veriksystems, Inc.
++ * Copyright 2014 Belkin Inc.
 + *
-+ * Author: Tom LV <tom.lv@veriksystems.com>
++ * Author: Belkin Inc.
 + *
 + * This file is subject to the terms and conditions of version 2 of
 + * the GNU General Public License.  See the file COPYING in the main
@@ -555,6 +550,6 @@ index 0000000..ec975a0
 +
 +module_i2c_driver(tlc59116_driver);
 +
-+MODULE_AUTHOR("Tom LV <tom.lv@veriksystems.com>");
++MODULE_AUTHOR("Belkin Inc.");
 +MODULE_DESCRIPTION("TLC59116 LED driver");
 +MODULE_LICENSE("GPL v2");

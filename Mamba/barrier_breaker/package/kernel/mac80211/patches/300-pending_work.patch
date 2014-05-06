@@ -1,3 +1,509 @@
+commit 584d297fd29fb39c76af25ae74ff9d5fe74c8a14
+Author: Helmut Schaa <helmut.schaa@googlemail.com>
+Date:   Wed Mar 12 10:37:55 2014 +0100
+
+    ath9k: Fix sequence number assignment for non-data frames
+    
+    Since commit 558ff225de80ac95b132d3a115ddadcd64498b4f (ath9k: fix
+    ps-poll responses under a-mpdu sessions) non-data frames would have
+    gotten a sequence number from a TIDs sequence counter instead of
+    using the global sequence counter.
+    
+    This can lead to instable connections.
+    
+    To fix this only select the correct TID if we are processing a
+    data frame. Furthermore, prevent non-data frames to get a sequence
+    number from a TID sequence counter by adding a check to
+    ath_tx_setup_buffer.
+    
+    Cc: Felix Fietkau <nbd@openwrt.org>
+    Signed-off-by: Helmut Schaa <helmut.schaa@googlemail.com>
+
+commit 3a0f984b1cdcd6a9f8c441635ef3b05d58547f4e
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Tue Mar 11 14:03:32 2014 +0100
+
+    ath9k_hw: set ANI firstep as absolute values instead of relative
+    
+    On older chips, the INI value differ in similar ways as cycpwr_thr1, so
+    convert it to absolute values as well.
+    
+    Since the ANI algorithm is different here compared to the old
+    implementation (fewer steps, controlled at a different point in time),
+    it makes sense to use values similar to what would be applied for newer
+    chips, just without relying on INI defaults.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 91d70d40400c569b49605b78fd7c43e9405694f4
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Tue Mar 11 14:00:37 2014 +0100
+
+    ath9k_hw: set ANI cycpwr_thr1 as absolute values instead of relative
+    
+    The table was copied from the ANI implementation of AR9300. It assumes
+    that the INI values contain a baseline value that is usable as reference
+    from which to increase/decrease based on the noise immunity value.
+    
+    On older chips, the differences are bigger and especially AR5008/AR9001
+    are configured to much more sensitive values than what is useful.
+    
+    Improve ANI behavior by reverting to the absolute values used in the
+    previous implementation (expressed as a simple formula instead of the
+    old table).
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit c977493766310a825f406836636ffd66e1447783
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Mon Mar 10 19:52:56 2014 +0100
+
+    ath9k_hw: remove ANI function restrictions for AP mode
+    
+    The primary purpose of this piece of code was to selectively disable
+    OFDM weak signal detection. The checks for this are elsewhere, and an
+    earlier commit relaxed the restrictions for older chips, which are more
+    sensitive to interference.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 8d804f1af11e4e058b1e8453327777d73a585cb8
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sun Mar 9 11:25:43 2014 +0100
+
+    ath9k: clean up and enhance ANI debugfs file
+    
+    Unify scnprintf calls and include the current OFDM/CCK immunity level.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 22e298b5a3a8a49e33805d4e351965123dede35b
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sun Mar 9 10:58:47 2014 +0100
+
+    ath9k: fix ready time of the multicast buffer queue
+    
+    qi->tqi_readyTime is written directly to registers that expect
+    microseconds as unit instead of TU.
+    When setting the CABQ ready time, cur_conf->beacon_interval is in TU, so
+    convert it to microseconds before passing it to ath9k_hw.
+    
+    This should hopefully fix some Tx DMA issues with buffered multicast
+    frames in AP mode.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit fcb064fdd5a27bec8d24099bc0172468f34c97cb
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sun Mar 9 09:43:09 2014 +0100
+
+    ath9k_hw: fix unreachable code in baseband hang detection code
+    
+    The commit "ath9k: reduce baseband hang detection false positive rate"
+    added a delay in the loop checking the baseband state, however it was
+    unreachable due to previous 'continue' statements.
+    
+    Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 31959d8df39319e32c6d5ba9c135727be90cfad7
+Author: Michal Kazior <michal.kazior@tieto.com>
+Date:   Fri Mar 7 08:09:38 2014 +0100
+
+    mac80211: fix possible NULL dereference
+    
+    If chanctx is missing on a given vif then the band
+    is assumed to be 2GHz. However if hw doesn't
+    support 2GHz band then mac80211 ended up with a
+    NULL dereference.
+    
+    This fixes a splat:
+    
+    [ 4605.207223] BUG: unable to handle kernel NULL pointer dereference at 0000000000000018
+    [ 4605.210789] IP: [<ffffffffa07b5635>] ieee80211_parse_bitrates+0x65/0x110 [mac80211]
+    
+    The splat was preceeded by WARN_ON(!chanctx_conf)
+    in ieee80211_get_sdata_band().
+    
+    Signed-off-by: Michal Kazior <michal.kazior@tieto.com>
+
+commit 6c5a3ffa0a2d22c091a2717f427259bacf77ac5e
+Author: Michael Braun <michael-dev@fami-braun.de>
+Date:   Thu Mar 6 15:08:43 2014 +0100
+
+    mac80211: fix WPA with VLAN on AP side with ps-sta again
+    
+    commit de74a1d9032f4d37ea453ad2a647e1aff4cd2591
+      "mac80211: fix WPA with VLAN on AP side with ps-sta"
+    fixed an issue where queued multicast packets would
+    be sent out encrypted with the key of an other bss.
+    
+    commit "7cbf9d017dbb5e3276de7d527925d42d4c11e732"
+      "mac80211: fix oops on mesh PS broadcast forwarding"
+    essentially reverted it, because vif.type cannot be AP_VLAN
+    due to the check to vif.type in ieee80211_get_buffered_bc before.
+    
+    As the later commit intended to fix the MESH case, fix it
+    by checking for IFTYPE_AP instead of IFTYPE_AP_VLAN.
+    
+    Fixes: 7cbf9d017dbb
+    Cc: <stable@vger.kernel.org> # 3.10.x
+    Cc: <stable@vger.kernel.org> # 3.11.x
+    Cc: <stable@vger.kernel.org> # 3.12.x
+    Cc: <stable@vger.kernel.org> # 3.13.x
+    Cc: <linux-wireless@vger.kernel.org>
+    Cc: <projekt-wlan@fem.tu-ilmenau.de>
+    Signed-off-by: Michael Braun <michael-dev@fami-braun.de>
+
+commit 9d6ab9bdb9b368a6cf9519f0f92509b5b2c297ec
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Mon Mar 3 14:19:08 2014 +0100
+
+    cfg80211: remove racy beacon_interval assignment
+    
+    In case of AP mode, the beacon interval is already reset to
+    zero inside cfg80211_stop_ap(), and in the other modes it
+    isn't relevant. Remove the assignment to remove a potential
+    race since the assignment isn't properly locked.
+    
+    Reported-by: Michal Kazior <michal.kazior@tieto.com>
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+commit 1abdeca3c6fb9cf1f84f85e78ed8d1c33bd69db0
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Fri Feb 28 18:52:56 2014 +0100
+
+    ath9k_hw: tweak noise immunity thresholds for older chipsets
+    
+    Older chipsets are more sensitive to high PHY error counts, and the
+    current noise immunity thresholds were based on tests run at QCA with
+    newer chipsets.
+    
+    This patch brings back the values from the old ANI implementation for
+    old chipsets, and it also disables weak signal detection on an earlier
+    noise immunity level, to improve overall radio stability on affected
+    devices.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 431e506da5953adc3b65af25f4b90873d528c115
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Fri Feb 28 18:44:13 2014 +0100
+
+    ath9k_hw: toggle weak signal detection in AP mode on older chipsets
+    
+    The commit 80b4205b "ath9k: Fix OFDM weak signal detection for AP mode"
+    prevented weak signal detection changes from taking effect in AP mode on
+    all chipsets, claiming it is "not allowed".
+    
+    The main reason for not disabling weak signal detection in AP mode is
+    that typically beacon RSSI is used to track whether it is needed to
+    boost range, and this is unavailable in AP mode for obvious reasons.
+    
+    The problem with not disabling weak signal detection is that older
+    chipsets are very sensitive to high PHY error counts. When faced with
+    heavy noise, this can lead to an excessive amount of "Failed to stop
+    TX DMA" errors in the field.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 98d1a6c5b14688ed030e81b889f607be308e0df9
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Mon Feb 24 22:20:32 2014 +0100
+
+    ath9k: fix invalid descriptor discarding
+    
+    Only set sc->rx.discard_next to rx_stats->rs_more when actually
+    discarding the current descriptor.
+    
+    Also, fix a detection of broken descriptors:
+    First the code checks if the current descriptor is not done.
+    Then it checks if the next descriptor is done.
+    Add a check that afterwards checks the first descriptor again, because
+    it might have been completed in the mean time.
+    
+    This fixes a regression introduced in
+    commit 723e711356b5a8a95728a890e254e8b0d47b55cf
+    "ath9k: fix handling of broken descriptors"
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Marco André Dinis <marcoandredinis@gmail.com>
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 52a46300e782fe6994466523eb2b0b59091ea59f
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Mon Feb 24 11:43:50 2014 +0100
+
+    ath9k: reduce baseband hang detection false positive rate
+    
+    Check if the baseband state remains stable, and add a small delay
+    between register reads.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 118945bb12082e9d4edddc868d88143164e0f440
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sat Feb 22 14:55:23 2014 +0100
+
+    ath5k: set SURVEY_INFO_IN_USE on get_survey
+    
+    Only one channel is returned - the one currently being used.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit ee41f72476e1ea44283dfe1cbf75b9543a1e15c8
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sat Feb 22 14:44:52 2014 +0100
+
+    ath9k: make some hardware reset log messages debug-only
+    
+    On some chips, baseband watchdog hangs are more common than others, and
+    the driver has support for handling them.
+    Interrupts even after a watchdog hang are also quite common, so there's
+    not much point in spamming the user's logfiles.
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit b14fbb554fc65a2e0b5c41a319269b0350f187e7
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sat Feb 22 14:35:25 2014 +0100
+
+    ath9k: do not set half/quarter channel flags in AR_PHY_MODE
+    
+    5/10 MHz channel bandwidth is configured via the PLL clock, instead of
+    the AR_PHY_MODE register. Using that register is AR93xx specific, and
+    makes the mode incompatible with earlier chipsets.
+    
+    In some early versions, these flags were apparently applied at the wrong
+    point in time and thus did not cause connectivity issues, however now
+    they are causing problems, as pointed out in this OpenWrt ticket:
+    
+    https://dev.openwrt.org/ticket/14916
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit 0f1cb7be2551b30b02cd54c897e0e29e483cfda5
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Sat Feb 22 13:43:29 2014 +0100
+
+    ath9k: fix ps-poll responses under a-mpdu sessions
+    
+    When passing tx frames to the U-APSD queue for powersave poll responses,
+    the ath_atx_tid pointer needs to be passed to ath_tx_setup_buffer for
+    proper sequence number accounting.
+    
+    This fixes high latency and connection stability issues with ath9k
+    running as AP and a few kinds of mobile phones as client, when PS-Poll
+    is heavily used
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit d5d87a37bbd6066b2c3c5d0bd0fe2a6e2ea45cc5
+Author: Felix Fietkau <nbd@openwrt.org>
+Date:   Fri Feb 21 11:39:59 2014 +0100
+
+    ath9k: list more reset causes in debugfs
+    
+    Number of MAC hangs and stuck beacons were missing
+    
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+
+commit d84856012e0f10fe598a5ad3b7b869397a089e07
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Thu Feb 20 11:19:58 2014 +0100
+
+    mac80211: fix station wakeup powersave race
+    
+    Consider the following (relatively unlikely) scenario:
+     1) station goes to sleep while frames are buffered in driver
+     2) driver blocks wakeup (until no more frames are buffered)
+     3) station wakes up again
+     4) driver unblocks wakeup
+    
+    In this case, the current mac80211 code will do the following:
+     1) WLAN_STA_PS_STA set
+     2) WLAN_STA_PS_DRIVER set
+     3) - nothing -
+     4) WLAN_STA_PS_DRIVER cleared
+    
+    As a result, no frames will be delivered to the client, even
+    though it is awake, until it sends another frame to us that
+    triggers ieee80211_sta_ps_deliver_wakeup() in sta_ps_end().
+    
+    Since we now take the PS spinlock, we can fix this while at
+    the same time removing the complexity with the pending skb
+    queue function. This was broken since my commit 50a9432daeec
+    ("mac80211: fix powersaving clients races") due to removing
+    the clearing of WLAN_STA_PS_STA in the RX path.
+    
+    While at it, fix a cleanup path issue when a station is
+    removed while the driver is still blocking its wakeup.
+    
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+commit 798f2786602cbe93e6b928299614aa36ebf50692
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Mon Feb 17 20:49:03 2014 +0100
+
+    mac80211: insert stations before adding to driver
+    
+    There's a race condition in mac80211 because we add stations
+    to the internal lists after adding them to the driver, which
+    means that (for example) the following can happen:
+     1. a station connects and is added
+     2. first, it is added to the driver
+     3. then, it is added to the mac80211 lists
+    
+    If the station goes to sleep between steps 2 and 3, and the
+    firmware/hardware records it as being asleep, mac80211 will
+    never instruct the driver to wake it up again as it never
+    realized it went to sleep since the RX path discarded the
+    frame as a "spurious class 3 frame", no station entry was
+    present yet.
+    
+    Fix this by adding the station in software first, and only
+    then adding it to the driver. That way, any state that the
+    driver changes will be reflected properly in mac80211's
+    station state. The problematic part is the roll-back if the
+    driver fails to add the station, in that case a bit more is
+    needed. To not make that overly complex prevent starting BA
+    sessions in the meantime.
+    
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+commit b9ba6a520cb07ab3aa7aaaf9ce4a0bc7a6bc06fe
+Author: Emmanuel Grumbach <emmanuel.grumbach@intel.com>
+Date:   Thu Feb 20 09:22:11 2014 +0200
+
+    mac80211: fix AP powersave TX vs. wakeup race
+    
+    There is a race between the TX path and the STA wakeup: while
+    a station is sleeping, mac80211 buffers frames until it wakes
+    up, then the frames are transmitted. However, the RX and TX
+    path are concurrent, so the packet indicating wakeup can be
+    processed while a packet is being transmitted.
+    
+    This can lead to a situation where the buffered frames list
+    is emptied on the one side, while a frame is being added on
+    the other side, as the station is still seen as sleeping in
+    the TX path.
+    
+    As a result, the newly added frame will not be send anytime
+    soon. It might be sent much later (and out of order) when the
+    station goes to sleep and wakes up the next time.
+    
+    Additionally, it can lead to the crash below.
+    
+    Fix all this by synchronising both paths with a new lock.
+    Both path are not fastpath since they handle PS situations.
+    
+    In a later patch we'll remove the extra skb queue locks to
+    reduce locking overhead.
+    
+    BUG: unable to handle kernel
+    NULL pointer dereference at 000000b0
+    IP: [<ff6f1791>] ieee80211_report_used_skb+0x11/0x3e0 [mac80211]
+    *pde = 00000000
+    Oops: 0000 [#1] SMP DEBUG_PAGEALLOC
+    EIP: 0060:[<ff6f1791>] EFLAGS: 00210282 CPU: 1
+    EIP is at ieee80211_report_used_skb+0x11/0x3e0 [mac80211]
+    EAX: e5900da0 EBX: 00000000 ECX: 00000001 EDX: 00000000
+    ESI: e41d00c0 EDI: e5900da0 EBP: ebe458e4 ESP: ebe458b0
+     DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068
+    CR0: 8005003b CR2: 000000b0 CR3: 25a78000 CR4: 000407d0
+    DR0: 00000000 DR1: 00000000 DR2: 00000000 DR3: 00000000
+    DR6: ffff0ff0 DR7: 00000400
+    Process iperf (pid: 3934, ti=ebe44000 task=e757c0b0 task.ti=ebe44000)
+    iwlwifi 0000:02:00.0: I iwl_pcie_enqueue_hcmd Sending command LQ_CMD (#4e), seq: 0x0903, 92 bytes at 3[3]:9
+    Stack:
+     e403b32c ebe458c4 00200002 00200286 e403b338 ebe458cc c10960bb e5900da0
+     ff76a6ec ebe458d8 00000000 e41d00c0 e5900da0 ebe458f0 ff6f1b75 e403b210
+     ebe4598c ff723dc1 00000000 ff76a6ec e597c978 e403b758 00000002 00000002
+    Call Trace:
+     [<ff6f1b75>] ieee80211_free_txskb+0x15/0x20 [mac80211]
+     [<ff723dc1>] invoke_tx_handlers+0x1661/0x1780 [mac80211]
+     [<ff7248a5>] ieee80211_tx+0x75/0x100 [mac80211]
+     [<ff7249bf>] ieee80211_xmit+0x8f/0xc0 [mac80211]
+     [<ff72550e>] ieee80211_subif_start_xmit+0x4fe/0xe20 [mac80211]
+     [<c149ef70>] dev_hard_start_xmit+0x450/0x950
+     [<c14b9aa9>] sch_direct_xmit+0xa9/0x250
+     [<c14b9c9b>] __qdisc_run+0x4b/0x150
+     [<c149f732>] dev_queue_xmit+0x2c2/0xca0
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Yaara Rozenblum <yaara.rozenblum@intel.com>
+    Signed-off-by: Emmanuel Grumbach <emmanuel.grumbach@intel.com>
+    Reviewed-by: Stanislaw Gruszka <sgruszka@redhat.com>
+    [reword commit log, use a separate lock]
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+commit 80e419de0dff38436b30d363311c625766193f86
+Author: Inbal Hacohen <Inbal.Hacohen@intel.com>
+Date:   Wed Feb 12 09:32:27 2014 +0200
+
+    cfg80211: bugfix in regulatory user hint process
+    
+    After processing hint_user, we would want to schedule the
+    timeout work only if we are actually waiting to CRDA. This happens
+    when the status is not "IGNORE" nor "ALREADY_SET".
+    
+    Signed-off-by: Inbal Hacohen <Inbal.Hacohen@intel.com>
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+commit 6514c93afede55284e2cb63359aadedb85884c80
+Author: Jouni Malinen <jouni@qca.qualcomm.com>
+Date:   Tue Feb 18 20:41:08 2014 +0200
+
+    ath9k: Enable U-APSD AP mode support
+    
+    mac80211 handles the actual operations, so ath9k can just indicate
+    support for this. Based on initial tests, this combination seems to
+    work fine.
+    
+    Signed-off-by: Jouni Malinen <jouni@qca.qualcomm.com>
+
+commit a63caf0a357ad5c1f08d6b7827dc76c451445017
+Author: Stanislaw Gruszka <sgruszka@redhat.com>
+Date:   Wed Feb 19 13:15:17 2014 +0100
+
+    ath9k: protect tid->sched check
+    
+    We check tid->sched without a lock taken on ath_tx_aggr_sleep(). That
+    is race condition which can result of doing list_del(&tid->list) twice
+    (second time with poisoned list node) and cause crash like shown below:
+    
+    [424271.637220] BUG: unable to handle kernel paging request at 00100104
+    [424271.637328] IP: [<f90fc072>] ath_tx_aggr_sleep+0x62/0xe0 [ath9k]
+    ...
+    [424271.639953] Call Trace:
+    [424271.639998]  [<f90f6900>] ? ath9k_get_survey+0x110/0x110 [ath9k]
+    [424271.640083]  [<f90f6942>] ath9k_sta_notify+0x42/0x50 [ath9k]
+    [424271.640177]  [<f809cfef>] sta_ps_start+0x8f/0x1c0 [mac80211]
+    [424271.640258]  [<c10f730e>] ? free_compound_page+0x2e/0x40
+    [424271.640346]  [<f809e915>] ieee80211_rx_handlers+0x9d5/0x2340 [mac80211]
+    [424271.640437]  [<c112f048>] ? kmem_cache_free+0x1d8/0x1f0
+    [424271.640510]  [<c1345a84>] ? kfree_skbmem+0x34/0x90
+    [424271.640578]  [<c10fc23c>] ? put_page+0x2c/0x40
+    [424271.640640]  [<c1345a84>] ? kfree_skbmem+0x34/0x90
+    [424271.640706]  [<c1345a84>] ? kfree_skbmem+0x34/0x90
+    [424271.640787]  [<f809dde3>] ? ieee80211_rx_handlers_result+0x73/0x1d0 [mac80211]
+    [424271.640897]  [<f80a07a0>] ieee80211_prepare_and_rx_handle+0x520/0xad0 [mac80211]
+    [424271.641009]  [<f809e22d>] ? ieee80211_rx_handlers+0x2ed/0x2340 [mac80211]
+    [424271.641104]  [<c13846ce>] ? ip_output+0x7e/0xd0
+    [424271.641182]  [<f80a1057>] ieee80211_rx+0x307/0x7c0 [mac80211]
+    [424271.641266]  [<f90fa6ee>] ath_rx_tasklet+0x88e/0xf70 [ath9k]
+    [424271.641358]  [<f80a0f2c>] ? ieee80211_rx+0x1dc/0x7c0 [mac80211]
+    [424271.641445]  [<f90f82db>] ath9k_tasklet+0xcb/0x130 [ath9k]
+    
+    Bug report:
+    https://bugzilla.kernel.org/show_bug.cgi?id=70551
+    
+    Reported-and-tested-by: Max Sydorenko <maxim.stargazer@gmail.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Stanislaw Gruszka <sgruszka@redhat.com>
+
 commit 82ed9e3ccc02797df2ffe4b78127c4cd5f799a41
 Author: Felix Fietkau <nbd@openwrt.org>
 Date:   Tue Feb 11 15:54:13 2014 +0100
@@ -791,7 +1297,31 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	else
  		udelay(100);
  
-@@ -2051,9 +2051,8 @@ static bool ath9k_hw_set_power_awake(str
+@@ -1534,7 +1534,7 @@ EXPORT_SYMBOL(ath9k_hw_check_nav);
+ bool ath9k_hw_check_alive(struct ath_hw *ah)
+ {
+ 	int count = 50;
+-	u32 reg;
++	u32 reg, last_val;
+ 
+ 	if (AR_SREV_9300(ah))
+ 		return !ath9k_hw_detect_mac_hang(ah);
+@@ -1542,9 +1542,14 @@ bool ath9k_hw_check_alive(struct ath_hw 
+ 	if (AR_SREV_9285_12_OR_LATER(ah))
+ 		return true;
+ 
++	last_val = REG_READ(ah, AR_OBS_BUS_1);
+ 	do {
+ 		reg = REG_READ(ah, AR_OBS_BUS_1);
++		if (reg != last_val)
++			return true;
+ 
++		udelay(1);
++		last_val = reg;
+ 		if ((reg & 0x7E7FFFEF) == 0x00702400)
+ 			continue;
+ 
+@@ -2051,9 +2056,8 @@ static bool ath9k_hw_set_power_awake(str
  
  	REG_SET_BIT(ah, AR_RTC_FORCE_WAKE,
  		    AR_RTC_FORCE_WAKE_EN);
@@ -804,6 +1334,33 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  
 --- a/drivers/net/wireless/ath/ath9k/main.c
 +++ b/drivers/net/wireless/ath/ath9k/main.c
+@@ -451,7 +451,7 @@ void ath9k_tasklet(unsigned long data)
+ 		 * interrupts are enabled in the reset routine.
+ 		 */
+ 		atomic_inc(&ah->intr_ref_cnt);
+-		ath_dbg(common, ANY, "FATAL: Skipping interrupts\n");
++		ath_dbg(common, RESET, "FATAL: Skipping interrupts\n");
+ 		goto out;
+ 	}
+ 
+@@ -471,7 +471,7 @@ void ath9k_tasklet(unsigned long data)
+ 			 * interrupts are enabled in the reset routine.
+ 			 */
+ 			atomic_inc(&ah->intr_ref_cnt);
+-			ath_dbg(common, ANY,
++			ath_dbg(common, RESET,
+ 				"BB_WATCHDOG: Skipping interrupts\n");
+ 			goto out;
+ 		}
+@@ -484,7 +484,7 @@ void ath9k_tasklet(unsigned long data)
+ 			type = RESET_TYPE_TX_GTT;
+ 			ath9k_queue_reset(sc, type);
+ 			atomic_inc(&ah->intr_ref_cnt);
+-			ath_dbg(common, ANY,
++			ath_dbg(common, RESET,
+ 				"GTT: Skipping interrupts\n");
+ 			goto out;
+ 		}
 @@ -1866,7 +1866,7 @@ static void ath9k_set_coverage_class(str
  
  static bool ath9k_has_tx_pending(struct ath_softc *sc)
@@ -1094,7 +1651,17 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  
  	__sta_info_flush(sdata, true);
  	ieee80211_free_keys(sdata, true);
-@@ -2638,6 +2643,24 @@ static int ieee80211_start_roc_work(stru
+@@ -1988,6 +1993,9 @@ static int ieee80211_change_bss(struct w
+ 
+ 	band = ieee80211_get_sdata_band(sdata);
+ 
++	if (WARN_ON(!wiphy->bands[band]))
++		return -EINVAL;
++
+ 	if (params->use_cts_prot >= 0) {
+ 		sdata->vif.bss_conf.use_cts_prot = params->use_cts_prot;
+ 		changed |= BSS_CHANGED_ERP_CTS_PROT;
+@@ -2638,6 +2646,24 @@ static int ieee80211_start_roc_work(stru
  	INIT_DELAYED_WORK(&roc->work, ieee80211_sw_roc_work);
  	INIT_LIST_HEAD(&roc->dependents);
  
@@ -1119,7 +1686,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	/* if there's one pending or we're scanning, queue this one */
  	if (!list_empty(&local->roc_list) ||
  	    local->scanning || local->radar_detect_enabled)
-@@ -2772,24 +2795,6 @@ static int ieee80211_start_roc_work(stru
+@@ -2772,24 +2798,6 @@ static int ieee80211_start_roc_work(stru
  	if (!queued)
  		list_add_tail(&roc->list, &local->roc_list);
  
@@ -1144,7 +1711,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	return 0;
  }
  
-@@ -3004,8 +3009,10 @@ void ieee80211_csa_finalize_work(struct 
+@@ -3004,8 +3012,10 @@ void ieee80211_csa_finalize_work(struct 
  	if (!ieee80211_sdata_running(sdata))
  		goto unlock;
  
@@ -1156,7 +1723,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	err = ieee80211_vif_change_channel(sdata, &changed);
  	mutex_unlock(&local->mtx);
  	if (WARN_ON(err < 0))
-@@ -3022,13 +3029,13 @@ void ieee80211_csa_finalize_work(struct 
+@@ -3022,13 +3032,13 @@ void ieee80211_csa_finalize_work(struct 
  	switch (sdata->vif.type) {
  	case NL80211_IFTYPE_AP:
  		err = ieee80211_assign_beacon(sdata, sdata->u.ap.next_beacon);
@@ -1173,7 +1740,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  		ieee80211_bss_info_change_notify(sdata, err);
  		break;
  	case NL80211_IFTYPE_ADHOC:
-@@ -3066,7 +3073,7 @@ int ieee80211_channel_switch(struct wiph
+@@ -3066,7 +3076,7 @@ int ieee80211_channel_switch(struct wiph
  	struct ieee80211_if_mesh __maybe_unused *ifmsh;
  	int err, num_chanctx;
  
@@ -1277,7 +1844,21 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  		return -1; /* not a robust management frame */
  
  	mmie = (struct ieee80211_mmie *)
-@@ -1311,18 +1311,15 @@ ieee80211_rx_h_sta_process(struct ieee80
+@@ -1128,6 +1128,13 @@ static void sta_ps_end(struct sta_info *
+ 	       sta->sta.addr, sta->sta.aid);
+ 
+ 	if (test_sta_flag(sta, WLAN_STA_PS_DRIVER)) {
++		/*
++		 * Clear the flag only if the other one is still set
++		 * so that the TX path won't start TX'ing new frames
++		 * directly ... In the case that the driver flag isn't
++		 * set ieee80211_sta_ps_deliver_wakeup() will clear it.
++		 */
++		clear_sta_flag(sta, WLAN_STA_PS_STA);
+ 		ps_dbg(sta->sdata, "STA %pM aid %d driver-ps-blocked\n",
+ 		       sta->sta.addr, sta->sta.aid);
+ 		return;
+@@ -1311,18 +1318,15 @@ ieee80211_rx_h_sta_process(struct ieee80
  	    !ieee80211_has_morefrags(hdr->frame_control) &&
  	    !(status->rx_flags & IEEE80211_RX_DEFERRED_RELEASE) &&
  	    (rx->sdata->vif.type == NL80211_IFTYPE_AP ||
@@ -1304,7 +1885,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  				sta_ps_end(sta);
  		} else {
  			if (ieee80211_has_pm(hdr->frame_control))
-@@ -1845,8 +1842,7 @@ static int ieee80211_drop_unencrypted_mg
+@@ -1845,8 +1849,7 @@ static int ieee80211_drop_unencrypted_mg
  		 * having configured keys.
  		 */
  		if (unlikely(ieee80211_is_action(fc) && !rx->key &&
@@ -1326,7 +1907,36 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  		return 0;
  
  	return 1;
-@@ -525,9 +524,7 @@ ieee80211_tx_h_ps_buf(struct ieee80211_t
+@@ -478,6 +477,20 @@ ieee80211_tx_h_unicast_ps_buf(struct iee
+ 		       sta->sta.addr, sta->sta.aid, ac);
+ 		if (tx->local->total_ps_buffered >= TOTAL_MAX_TX_BUFFER)
+ 			purge_old_ps_buffers(tx->local);
++
++		/* sync with ieee80211_sta_ps_deliver_wakeup */
++		spin_lock(&sta->ps_lock);
++		/*
++		 * STA woke up the meantime and all the frames on ps_tx_buf have
++		 * been queued to pending queue. No reordering can happen, go
++		 * ahead and Tx the packet.
++		 */
++		if (!test_sta_flag(sta, WLAN_STA_PS_STA) &&
++		    !test_sta_flag(sta, WLAN_STA_PS_DRIVER)) {
++			spin_unlock(&sta->ps_lock);
++			return TX_CONTINUE;
++		}
++
+ 		if (skb_queue_len(&sta->ps_tx_buf[ac]) >= STA_MAX_TX_BUFFER) {
+ 			struct sk_buff *old = skb_dequeue(&sta->ps_tx_buf[ac]);
+ 			ps_dbg(tx->sdata,
+@@ -492,6 +505,7 @@ ieee80211_tx_h_unicast_ps_buf(struct iee
+ 		info->flags |= IEEE80211_TX_INTFL_NEED_TXPROCESSING;
+ 		info->flags &= ~IEEE80211_TX_TEMPORARY_FLAGS;
+ 		skb_queue_tail(&sta->ps_tx_buf[ac], tx->skb);
++		spin_unlock(&sta->ps_lock);
+ 
+ 		if (!timer_pending(&local->sta_cleanup))
+ 			mod_timer(&local->sta_cleanup,
+@@ -525,9 +539,7 @@ ieee80211_tx_h_ps_buf(struct ieee80211_t
  
  	/* only deauth, disassoc and action are bufferable MMPDUs */
  	if (ieee80211_is_mgmt(hdr->frame_control) &&
@@ -1337,7 +1947,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  		if (tx->flags & IEEE80211_TX_UNICAST)
  			info->flags |= IEEE80211_TX_CTL_NO_PS_BUFFER;
  		return TX_CONTINUE;
-@@ -567,7 +564,7 @@ ieee80211_tx_h_select_key(struct ieee802
+@@ -567,7 +579,7 @@ ieee80211_tx_h_select_key(struct ieee802
  		tx->key = key;
  	else if (ieee80211_is_mgmt(hdr->frame_control) &&
  		 is_multicast_ether_addr(hdr->addr1) &&
@@ -1346,7 +1956,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  		 (key = rcu_dereference(tx->sdata->default_mgmt_key)))
  		tx->key = key;
  	else if (is_multicast_ether_addr(hdr->addr1) &&
-@@ -582,12 +579,12 @@ ieee80211_tx_h_select_key(struct ieee802
+@@ -582,12 +594,12 @@ ieee80211_tx_h_select_key(struct ieee802
  		tx->key = NULL;
  	else if (tx->skb->protocol == tx->sdata->control_port_protocol)
  		tx->key = NULL;
@@ -1361,7 +1971,7 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  		tx->key = NULL;
  	else {
  		I802_DEBUG_INC(tx->local->tx_handlers_drop_unencrypted);
-@@ -878,7 +875,7 @@ static int ieee80211_fragment(struct iee
+@@ -878,7 +890,7 @@ static int ieee80211_fragment(struct iee
  	}
  
  	/* adjust first fragment's length */
@@ -1370,6 +1980,15 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	return 0;
  }
  
+@@ -2900,7 +2912,7 @@ ieee80211_get_buffered_bc(struct ieee802
+ 				cpu_to_le16(IEEE80211_FCTL_MOREDATA);
+ 		}
+ 
+-		if (sdata->vif.type == NL80211_IFTYPE_AP_VLAN)
++		if (sdata->vif.type == NL80211_IFTYPE_AP)
+ 			sdata = IEEE80211_DEV_TO_SUB_IF(skb->dev);
+ 		if (!ieee80211_tx_prepare(sdata, &tx, skb))
+ 			break;
 --- a/net/mac80211/wpa.c
 +++ b/net/mac80211/wpa.c
 @@ -499,7 +499,7 @@ ieee80211_crypto_ccmp_decrypt(struct iee
@@ -1421,7 +2040,16 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	/*
  	 * There are major locking problems in nl80211/mac80211 for CSA,
  	 * disable for all drivers until this has been reworked.
-@@ -875,8 +875,11 @@ static int cfg80211_netdev_notifier_call
+@@ -795,8 +795,6 @@ void cfg80211_leave(struct cfg80211_regi
+ 	default:
+ 		break;
+ 	}
+-
+-	wdev->beacon_interval = 0;
+ }
+ 
+ static int cfg80211_netdev_notifier_call(struct notifier_block *nb,
+@@ -875,8 +873,11 @@ static int cfg80211_netdev_notifier_call
  		break;
  	case NETDEV_DOWN:
  		cfg80211_update_iface_num(rdev, wdev->iftype, -1);
@@ -2732,3 +3360,783 @@ Date:   Thu Jan 23 20:06:34 2014 +0100
  	/* use the data classifier to determine what 802.1d tag the
  	 * data frame has */
  	rcu_read_lock();
+--- a/drivers/net/wireless/ath/ath9k/xmit.c
++++ b/drivers/net/wireless/ath/ath9k/xmit.c
+@@ -1444,14 +1444,16 @@ void ath_tx_aggr_sleep(struct ieee80211_
+ 	for (tidno = 0, tid = &an->tid[tidno];
+ 	     tidno < IEEE80211_NUM_TIDS; tidno++, tid++) {
+ 
+-		if (!tid->sched)
+-			continue;
+-
+ 		ac = tid->ac;
+ 		txq = ac->txq;
+ 
+ 		ath_txq_lock(sc, txq);
+ 
++		if (!tid->sched) {
++			ath_txq_unlock(sc, txq);
++			continue;
++		}
++
+ 		buffered = ath_tid_has_buffered(tid);
+ 
+ 		tid->sched = false;
+@@ -1696,7 +1698,7 @@ int ath_cabq_update(struct ath_softc *sc
+ 
+ 	ath9k_hw_get_txq_props(sc->sc_ah, qnum, &qi);
+ 
+-	qi.tqi_readyTime = (cur_conf->beacon_interval *
++	qi.tqi_readyTime = (TU_TO_USEC(cur_conf->beacon_interval) *
+ 			    ATH_CABQ_READY_TIME) / 100;
+ 	ath_txq_update(sc, qnum, &qi);
+ 
+@@ -2061,7 +2063,7 @@ static struct ath_buf *ath_tx_setup_buff
+ 
+ 	ATH_TXBUF_RESET(bf);
+ 
+-	if (tid) {
++	if (tid && ieee80211_is_data_present(hdr->frame_control)) {
+ 		fragno = le16_to_cpu(hdr->seq_ctrl) & IEEE80211_SCTL_FRAG;
+ 		seqno = tid->seq_next;
+ 		hdr->seq_ctrl = cpu_to_le16(tid->seq_next << IEEE80211_SEQ_SEQ_SHIFT);
+@@ -2184,14 +2186,15 @@ int ath_tx_start(struct ieee80211_hw *hw
+ 		txq->stopped = true;
+ 	}
+ 
++	if (txctl->an && ieee80211_is_data_present(hdr->frame_control))
++		tid = ath_get_skb_tid(sc, txctl->an, skb);
++
+ 	if (info->flags & IEEE80211_TX_CTL_PS_RESPONSE) {
+ 		ath_txq_unlock(sc, txq);
+ 		txq = sc->tx.uapsdq;
+ 		ath_txq_lock(sc, txq);
+ 	} else if (txctl->an &&
+ 		   ieee80211_is_data_present(hdr->frame_control)) {
+-		tid = ath_get_skb_tid(sc, txctl->an, skb);
+-
+ 		WARN_ON(tid->ac->txq != txctl->txq);
+ 
+ 		if (info->flags & IEEE80211_TX_CTL_CLEAR_PS_FILT)
+--- a/drivers/net/wireless/ath/ath9k/init.c
++++ b/drivers/net/wireless/ath/ath9k/init.c
+@@ -943,6 +943,7 @@ static void ath9k_set_hw_capab(struct at
+ 	hw->wiphy->flags |= WIPHY_FLAG_HAS_REMAIN_ON_CHANNEL;
+ 	hw->wiphy->flags |= WIPHY_FLAG_SUPPORTS_5_10_MHZ;
+ 	hw->wiphy->flags |= WIPHY_FLAG_HAS_CHANNEL_SWITCH;
++	hw->wiphy->flags |= WIPHY_FLAG_AP_UAPSD;
+ 
+ 	hw->queues = 4;
+ 	hw->max_rates = 4;
+--- a/net/mac80211/ieee80211_i.h
++++ b/net/mac80211/ieee80211_i.h
+@@ -1700,14 +1700,8 @@ void ieee80211_stop_queue_by_reason(stru
+ void ieee80211_propagate_queue_wake(struct ieee80211_local *local, int queue);
+ void ieee80211_add_pending_skb(struct ieee80211_local *local,
+ 			       struct sk_buff *skb);
+-void ieee80211_add_pending_skbs_fn(struct ieee80211_local *local,
+-				   struct sk_buff_head *skbs,
+-				   void (*fn)(void *data), void *data);
+-static inline void ieee80211_add_pending_skbs(struct ieee80211_local *local,
+-					      struct sk_buff_head *skbs)
+-{
+-	ieee80211_add_pending_skbs_fn(local, skbs, NULL, NULL);
+-}
++void ieee80211_add_pending_skbs(struct ieee80211_local *local,
++				struct sk_buff_head *skbs);
+ void ieee80211_flush_queues(struct ieee80211_local *local,
+ 			    struct ieee80211_sub_if_data *sdata);
+ 
+--- a/net/mac80211/sta_info.c
++++ b/net/mac80211/sta_info.c
+@@ -91,7 +91,7 @@ static int sta_info_hash_del(struct ieee
+ 	return -ENOENT;
+ }
+ 
+-static void cleanup_single_sta(struct sta_info *sta)
++static void __cleanup_single_sta(struct sta_info *sta)
+ {
+ 	int ac, i;
+ 	struct tid_ampdu_tx *tid_tx;
+@@ -99,7 +99,8 @@ static void cleanup_single_sta(struct st
+ 	struct ieee80211_local *local = sdata->local;
+ 	struct ps_data *ps;
+ 
+-	if (test_sta_flag(sta, WLAN_STA_PS_STA)) {
++	if (test_sta_flag(sta, WLAN_STA_PS_STA) ||
++	    test_sta_flag(sta, WLAN_STA_PS_DRIVER)) {
+ 		if (sta->sdata->vif.type == NL80211_IFTYPE_AP ||
+ 		    sta->sdata->vif.type == NL80211_IFTYPE_AP_VLAN)
+ 			ps = &sdata->bss->ps;
+@@ -109,6 +110,7 @@ static void cleanup_single_sta(struct st
+ 			return;
+ 
+ 		clear_sta_flag(sta, WLAN_STA_PS_STA);
++		clear_sta_flag(sta, WLAN_STA_PS_DRIVER);
+ 
+ 		atomic_dec(&ps->num_sta_ps);
+ 		sta_info_recalc_tim(sta);
+@@ -139,7 +141,14 @@ static void cleanup_single_sta(struct st
+ 		ieee80211_purge_tx_queue(&local->hw, &tid_tx->pending);
+ 		kfree(tid_tx);
+ 	}
++}
+ 
++static void cleanup_single_sta(struct sta_info *sta)
++{
++	struct ieee80211_sub_if_data *sdata = sta->sdata;
++	struct ieee80211_local *local = sdata->local;
++
++	__cleanup_single_sta(sta);
+ 	sta_info_free(local, sta);
+ }
+ 
+@@ -330,6 +339,7 @@ struct sta_info *sta_info_alloc(struct i
+ 	rcu_read_unlock();
+ 
+ 	spin_lock_init(&sta->lock);
++	spin_lock_init(&sta->ps_lock);
+ 	INIT_WORK(&sta->drv_unblock_wk, sta_unblock);
+ 	INIT_WORK(&sta->ampdu_mlme.work, ieee80211_ba_session_work);
+ 	mutex_init(&sta->ampdu_mlme.mtx);
+@@ -487,21 +497,26 @@ static int sta_info_insert_finish(struct
+ 		goto out_err;
+ 	}
+ 
+-	/* notify driver */
+-	err = sta_info_insert_drv_state(local, sdata, sta);
+-	if (err)
+-		goto out_err;
+-
+ 	local->num_sta++;
+ 	local->sta_generation++;
+ 	smp_mb();
+ 
++	/* simplify things and don't accept BA sessions yet */
++	set_sta_flag(sta, WLAN_STA_BLOCK_BA);
++
+ 	/* make the station visible */
+ 	sta_info_hash_add(local, sta);
+ 
+ 	list_add_rcu(&sta->list, &local->sta_list);
+ 
++	/* notify driver */
++	err = sta_info_insert_drv_state(local, sdata, sta);
++	if (err)
++		goto out_remove;
++
+ 	set_sta_flag(sta, WLAN_STA_INSERTED);
++	/* accept BA sessions now */
++	clear_sta_flag(sta, WLAN_STA_BLOCK_BA);
+ 
+ 	ieee80211_recalc_min_chandef(sdata);
+ 	ieee80211_sta_debugfs_add(sta);
+@@ -522,6 +537,12 @@ static int sta_info_insert_finish(struct
+ 		mesh_accept_plinks_update(sdata);
+ 
+ 	return 0;
++ out_remove:
++	sta_info_hash_del(local, sta);
++	list_del_rcu(&sta->list);
++	local->num_sta--;
++	synchronize_net();
++	__cleanup_single_sta(sta);
+  out_err:
+ 	mutex_unlock(&local->sta_mtx);
+ 	rcu_read_lock();
+@@ -1071,10 +1092,14 @@ struct ieee80211_sta *ieee80211_find_sta
+ }
+ EXPORT_SYMBOL(ieee80211_find_sta);
+ 
+-static void clear_sta_ps_flags(void *_sta)
++/* powersave support code */
++void ieee80211_sta_ps_deliver_wakeup(struct sta_info *sta)
+ {
+-	struct sta_info *sta = _sta;
+ 	struct ieee80211_sub_if_data *sdata = sta->sdata;
++	struct ieee80211_local *local = sdata->local;
++	struct sk_buff_head pending;
++	int filtered = 0, buffered = 0, ac;
++	unsigned long flags;
+ 	struct ps_data *ps;
+ 
+ 	if (sdata->vif.type == NL80211_IFTYPE_AP ||
+@@ -1085,20 +1110,6 @@ static void clear_sta_ps_flags(void *_st
+ 	else
+ 		return;
+ 
+-	clear_sta_flag(sta, WLAN_STA_PS_DRIVER);
+-	if (test_and_clear_sta_flag(sta, WLAN_STA_PS_STA))
+-		atomic_dec(&ps->num_sta_ps);
+-}
+-
+-/* powersave support code */
+-void ieee80211_sta_ps_deliver_wakeup(struct sta_info *sta)
+-{
+-	struct ieee80211_sub_if_data *sdata = sta->sdata;
+-	struct ieee80211_local *local = sdata->local;
+-	struct sk_buff_head pending;
+-	int filtered = 0, buffered = 0, ac;
+-	unsigned long flags;
+-
+ 	clear_sta_flag(sta, WLAN_STA_SP);
+ 
+ 	BUILD_BUG_ON(BITS_TO_LONGS(IEEE80211_NUM_TIDS) > 1);
+@@ -1109,6 +1120,8 @@ void ieee80211_sta_ps_deliver_wakeup(str
+ 
+ 	skb_queue_head_init(&pending);
+ 
++	/* sync with ieee80211_tx_h_unicast_ps_buf */
++	spin_lock(&sta->ps_lock);
+ 	/* Send all buffered frames to the station */
+ 	for (ac = 0; ac < IEEE80211_NUM_ACS; ac++) {
+ 		int count = skb_queue_len(&pending), tmp;
+@@ -1127,7 +1140,12 @@ void ieee80211_sta_ps_deliver_wakeup(str
+ 		buffered += tmp - count;
+ 	}
+ 
+-	ieee80211_add_pending_skbs_fn(local, &pending, clear_sta_ps_flags, sta);
++	ieee80211_add_pending_skbs(local, &pending);
++	clear_sta_flag(sta, WLAN_STA_PS_DRIVER);
++	clear_sta_flag(sta, WLAN_STA_PS_STA);
++	spin_unlock(&sta->ps_lock);
++
++	atomic_dec(&ps->num_sta_ps);
+ 
+ 	/* This station just woke up and isn't aware of our SMPS state */
+ 	if (!ieee80211_smps_is_restrictive(sta->known_smps_mode,
+--- a/net/mac80211/sta_info.h
++++ b/net/mac80211/sta_info.h
+@@ -267,6 +267,7 @@ struct ieee80211_tx_latency_stat {
+  * @drv_unblock_wk: used for driver PS unblocking
+  * @listen_interval: listen interval of this station, when we're acting as AP
+  * @_flags: STA flags, see &enum ieee80211_sta_info_flags, do not use directly
++ * @ps_lock: used for powersave (when mac80211 is the AP) related locking
+  * @ps_tx_buf: buffers (per AC) of frames to transmit to this station
+  *	when it leaves power saving state or polls
+  * @tx_filtered: buffers (per AC) of frames we already tried to
+@@ -356,10 +357,8 @@ struct sta_info {
+ 	/* use the accessors defined below */
+ 	unsigned long _flags;
+ 
+-	/*
+-	 * STA powersave frame queues, no more than the internal
+-	 * locking required.
+-	 */
++	/* STA powersave lock and frame queues */
++	spinlock_t ps_lock;
+ 	struct sk_buff_head ps_tx_buf[IEEE80211_NUM_ACS];
+ 	struct sk_buff_head tx_filtered[IEEE80211_NUM_ACS];
+ 	unsigned long driver_buffered_tids;
+--- a/net/mac80211/util.c
++++ b/net/mac80211/util.c
+@@ -435,9 +435,8 @@ void ieee80211_add_pending_skb(struct ie
+ 	spin_unlock_irqrestore(&local->queue_stop_reason_lock, flags);
+ }
+ 
+-void ieee80211_add_pending_skbs_fn(struct ieee80211_local *local,
+-				   struct sk_buff_head *skbs,
+-				   void (*fn)(void *data), void *data)
++void ieee80211_add_pending_skbs(struct ieee80211_local *local,
++				struct sk_buff_head *skbs)
+ {
+ 	struct ieee80211_hw *hw = &local->hw;
+ 	struct sk_buff *skb;
+@@ -461,9 +460,6 @@ void ieee80211_add_pending_skbs_fn(struc
+ 		__skb_queue_tail(&local->pending[queue], skb);
+ 	}
+ 
+-	if (fn)
+-		fn(data);
+-
+ 	for (i = 0; i < hw->queues; i++)
+ 		__ieee80211_wake_queue(hw, i,
+ 			IEEE80211_QUEUE_STOP_REASON_SKB_ADD);
+--- a/net/wireless/reg.c
++++ b/net/wireless/reg.c
+@@ -1700,7 +1700,7 @@ static void reg_process_hint(struct regu
+ 		return;
+ 	case NL80211_REGDOM_SET_BY_USER:
+ 		treatment = reg_process_hint_user(reg_request);
+-		if (treatment == REG_REQ_OK ||
++		if (treatment == REG_REQ_IGNORE ||
+ 		    treatment == REG_REQ_ALREADY_SET)
+ 			return;
+ 		schedule_delayed_work(&reg_timeout, msecs_to_jiffies(3142));
+--- a/drivers/net/wireless/ath/ath9k/debug.c
++++ b/drivers/net/wireless/ath/ath9k/debug.c
+@@ -138,43 +138,41 @@ static ssize_t read_file_ani(struct file
+ 	unsigned int len = 0, size = 1024;
+ 	ssize_t retval = 0;
+ 	char *buf;
++	int i;
++	struct {
++		const char *name;
++		unsigned int val;
++	} ani_info[] = {
++		{ "ANI RESET", ah->stats.ast_ani_reset },
++		{ "OFDM LEVEL", ah->ani.ofdmNoiseImmunityLevel },
++		{ "CCK LEVEL", ah->ani.cckNoiseImmunityLevel },
++		{ "SPUR UP", ah->stats.ast_ani_spurup },
++		{ "SPUR DOWN", ah->stats.ast_ani_spurup },
++		{ "OFDM WS-DET ON", ah->stats.ast_ani_ofdmon },
++		{ "OFDM WS-DET OFF", ah->stats.ast_ani_ofdmoff },
++		{ "MRC-CCK ON", ah->stats.ast_ani_ccklow },
++		{ "MRC-CCK OFF", ah->stats.ast_ani_cckhigh },
++		{ "FIR-STEP UP", ah->stats.ast_ani_stepup },
++		{ "FIR-STEP DOWN", ah->stats.ast_ani_stepdown },
++		{ "INV LISTENTIME", ah->stats.ast_ani_lneg_or_lzero },
++		{ "OFDM ERRORS", ah->stats.ast_ani_ofdmerrs },
++		{ "CCK ERRORS", ah->stats.ast_ani_cckerrs },
++	};
+ 
+ 	buf = kzalloc(size, GFP_KERNEL);
+ 	if (buf == NULL)
+ 		return -ENOMEM;
+ 
+-	if (common->disable_ani) {
+-		len += scnprintf(buf + len, size - len, "%s: %s\n",
+-				 "ANI", "DISABLED");
++	len += scnprintf(buf + len, size - len, "%15s: %s\n", "ANI",
++			 common->disable_ani ? "DISABLED" : "ENABLED");
++
++	if (common->disable_ani)
+ 		goto exit;
+-	}
+ 
+-	len += scnprintf(buf + len, size - len, "%15s: %s\n",
+-			 "ANI", "ENABLED");
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "ANI RESET", ah->stats.ast_ani_reset);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "SPUR UP", ah->stats.ast_ani_spurup);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "SPUR DOWN", ah->stats.ast_ani_spurup);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "OFDM WS-DET ON", ah->stats.ast_ani_ofdmon);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "OFDM WS-DET OFF", ah->stats.ast_ani_ofdmoff);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "MRC-CCK ON", ah->stats.ast_ani_ccklow);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "MRC-CCK OFF", ah->stats.ast_ani_cckhigh);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "FIR-STEP UP", ah->stats.ast_ani_stepup);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "FIR-STEP DOWN", ah->stats.ast_ani_stepdown);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "INV LISTENTIME", ah->stats.ast_ani_lneg_or_lzero);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "OFDM ERRORS", ah->stats.ast_ani_ofdmerrs);
+-	len += scnprintf(buf + len, size - len, "%15s: %u\n",
+-			 "CCK ERRORS", ah->stats.ast_ani_cckerrs);
++	for (i = 0; i < ARRAY_SIZE(ani_info); i++)
++		len += scnprintf(buf + len, size - len, "%15s: %u\n",
++				 ani_info[i].name, ani_info[i].val);
++
+ exit:
+ 	if (len > size)
+ 		len = size;
+@@ -866,6 +864,12 @@ static ssize_t read_file_reset(struct fi
+ 			 "%17s: %2d\n", "PLL RX Hang",
+ 			 sc->debug.stats.reset[RESET_TYPE_PLL_HANG]);
+ 	len += scnprintf(buf + len, sizeof(buf) - len,
++			 "%17s: %2d\n", "MAC Hang",
++			 sc->debug.stats.reset[RESET_TYPE_MAC_HANG]);
++	len += scnprintf(buf + len, sizeof(buf) - len,
++			 "%17s: %2d\n", "Stuck Beacon",
++			 sc->debug.stats.reset[RESET_TYPE_BEACON_STUCK]);
++	len += scnprintf(buf + len, sizeof(buf) - len,
+ 			 "%17s: %2d\n", "MCI Reset",
+ 			 sc->debug.stats.reset[RESET_TYPE_MCI]);
+ 
+--- a/drivers/net/wireless/ath/ath9k/ar9003_phy.c
++++ b/drivers/net/wireless/ath/ath9k/ar9003_phy.c
+@@ -868,10 +868,6 @@ static void ar9003_hw_set_rfmode(struct 
+ 
+ 	if (IS_CHAN_A_FAST_CLOCK(ah, chan))
+ 		rfMode |= (AR_PHY_MODE_DYNAMIC | AR_PHY_MODE_DYN_CCK_DISABLE);
+-	if (IS_CHAN_QUARTER_RATE(chan))
+-		rfMode |= AR_PHY_MODE_QUARTER;
+-	if (IS_CHAN_HALF_RATE(chan))
+-		rfMode |= AR_PHY_MODE_HALF;
+ 
+ 	if (rfMode & (AR_PHY_MODE_QUARTER | AR_PHY_MODE_HALF))
+ 		REG_RMW_FIELD(ah, AR_PHY_FRAME_CTL,
+--- a/drivers/net/wireless/ath/ath5k/mac80211-ops.c
++++ b/drivers/net/wireless/ath/ath5k/mac80211-ops.c
+@@ -706,6 +706,7 @@ ath5k_get_survey(struct ieee80211_hw *hw
+ 	survey->channel = conf->chandef.chan;
+ 	survey->noise = ah->ah_noise_floor;
+ 	survey->filled = SURVEY_INFO_NOISE_DBM |
++			SURVEY_INFO_IN_USE |
+ 			SURVEY_INFO_CHANNEL_TIME |
+ 			SURVEY_INFO_CHANNEL_TIME_BUSY |
+ 			SURVEY_INFO_CHANNEL_TIME_RX |
+--- a/drivers/net/wireless/ath/ath9k/recv.c
++++ b/drivers/net/wireless/ath/ath9k/recv.c
+@@ -732,11 +732,18 @@ static struct ath_rxbuf *ath_get_next_rx
+ 			return NULL;
+ 
+ 		/*
+-		 * mark descriptor as zero-length and set the 'more'
+-		 * flag to ensure that both buffers get discarded
++		 * Re-check previous descriptor, in case it has been filled
++		 * in the mean time.
+ 		 */
+-		rs->rs_datalen = 0;
+-		rs->rs_more = true;
++		ret = ath9k_hw_rxprocdesc(ah, ds, rs);
++		if (ret == -EINPROGRESS) {
++			/*
++			 * mark descriptor as zero-length and set the 'more'
++			 * flag to ensure that both buffers get discarded
++			 */
++			rs->rs_datalen = 0;
++			rs->rs_more = true;
++		}
+ 	}
+ 
+ 	list_del(&bf->list);
+@@ -985,32 +992,32 @@ static int ath9k_rx_skb_preprocess(struc
+ 	struct ath_common *common = ath9k_hw_common(ah);
+ 	struct ieee80211_hdr *hdr;
+ 	bool discard_current = sc->rx.discard_next;
+-	int ret = 0;
+ 
+ 	/*
+ 	 * Discard corrupt descriptors which are marked in
+ 	 * ath_get_next_rx_buf().
+ 	 */
+-	sc->rx.discard_next = rx_stats->rs_more;
+ 	if (discard_current)
+-		return -EINVAL;
++		goto corrupt;
++
++	sc->rx.discard_next = false;
+ 
+ 	/*
+ 	 * Discard zero-length packets.
+ 	 */
+ 	if (!rx_stats->rs_datalen) {
+ 		RX_STAT_INC(rx_len_err);
+-		return -EINVAL;
++		goto corrupt;
+ 	}
+ 
+-        /*
+-         * rs_status follows rs_datalen so if rs_datalen is too large
+-         * we can take a hint that hardware corrupted it, so ignore
+-         * those frames.
+-         */
++	/*
++	 * rs_status follows rs_datalen so if rs_datalen is too large
++	 * we can take a hint that hardware corrupted it, so ignore
++	 * those frames.
++	 */
+ 	if (rx_stats->rs_datalen > (common->rx_bufsize - ah->caps.rx_status_len)) {
+ 		RX_STAT_INC(rx_len_err);
+-		return -EINVAL;
++		goto corrupt;
+ 	}
+ 
+ 	/* Only use status info from the last fragment */
+@@ -1024,10 +1031,8 @@ static int ath9k_rx_skb_preprocess(struc
+ 	 * This is different from the other corrupt descriptor
+ 	 * condition handled above.
+ 	 */
+-	if (rx_stats->rs_status & ATH9K_RXERR_CORRUPT_DESC) {
+-		ret = -EINVAL;
+-		goto exit;
+-	}
++	if (rx_stats->rs_status & ATH9K_RXERR_CORRUPT_DESC)
++		goto corrupt;
+ 
+ 	hdr = (struct ieee80211_hdr *) (skb->data + ah->caps.rx_status_len);
+ 
+@@ -1043,18 +1048,15 @@ static int ath9k_rx_skb_preprocess(struc
+ 		if (ath_process_fft(sc, hdr, rx_stats, rx_status->mactime))
+ 			RX_STAT_INC(rx_spectral);
+ 
+-		ret = -EINVAL;
+-		goto exit;
++		return -EINVAL;
+ 	}
+ 
+ 	/*
+ 	 * everything but the rate is checked here, the rate check is done
+ 	 * separately to avoid doing two lookups for a rate for each frame.
+ 	 */
+-	if (!ath9k_rx_accept(common, hdr, rx_status, rx_stats, decrypt_error)) {
+-		ret = -EINVAL;
+-		goto exit;
+-	}
++	if (!ath9k_rx_accept(common, hdr, rx_status, rx_stats, decrypt_error))
++		return -EINVAL;
+ 
+ 	if (ath_is_mybeacon(common, hdr)) {
+ 		RX_STAT_INC(rx_beacons);
+@@ -1064,15 +1066,11 @@ static int ath9k_rx_skb_preprocess(struc
+ 	/*
+ 	 * This shouldn't happen, but have a safety check anyway.
+ 	 */
+-	if (WARN_ON(!ah->curchan)) {
+-		ret = -EINVAL;
+-		goto exit;
+-	}
++	if (WARN_ON(!ah->curchan))
++		return -EINVAL;
+ 
+-	if (ath9k_process_rate(common, hw, rx_stats, rx_status)) {
+-		ret =-EINVAL;
+-		goto exit;
+-	}
++	if (ath9k_process_rate(common, hw, rx_stats, rx_status))
++		return -EINVAL;
+ 
+ 	ath9k_process_rssi(common, hw, rx_stats, rx_status);
+ 
+@@ -1087,9 +1085,11 @@ static int ath9k_rx_skb_preprocess(struc
+ 		sc->rx.num_pkts++;
+ #endif
+ 
+-exit:
+-	sc->rx.discard_next = false;
+-	return ret;
++	return 0;
++
++corrupt:
++	sc->rx.discard_next = rx_stats->rs_more;
++	return -EINVAL;
+ }
+ 
+ static void ath9k_rx_skb_postprocess(struct ath_common *common,
+--- a/drivers/net/wireless/ath/ath9k/ani.c
++++ b/drivers/net/wireless/ath/ath9k/ani.c
+@@ -176,16 +176,26 @@ static void ath9k_hw_set_ofdm_nil(struct
+ 	if (ah->opmode == NL80211_IFTYPE_STATION &&
+ 	    BEACON_RSSI(ah) <= ATH9K_ANI_RSSI_THR_HIGH)
+ 		weak_sig = true;
+-
+ 	/*
+-	 * OFDM Weak signal detection is always enabled for AP mode.
++	 * Newer chipsets are better at dealing with high PHY error counts -
++	 * keep weak signal detection enabled when no RSSI threshold is
++	 * available to determine if it is needed (mode != STA)
+ 	 */
+-	if (ah->opmode != NL80211_IFTYPE_AP &&
+-	    aniState->ofdmWeakSigDetect != weak_sig) {
+-		ath9k_hw_ani_control(ah,
+-				     ATH9K_ANI_OFDM_WEAK_SIGNAL_DETECTION,
+-				     entry_ofdm->ofdm_weak_signal_on);
+-	}
++	else if (AR_SREV_9300_20_OR_LATER(ah) &&
++		 ah->opmode != NL80211_IFTYPE_STATION)
++		weak_sig = true;
++
++	/* Older chipsets are more sensitive to high PHY error counts */
++	else if (!AR_SREV_9300_20_OR_LATER(ah) &&
++		 aniState->ofdmNoiseImmunityLevel >= 8)
++		weak_sig = false;
++
++	if (aniState->ofdmWeakSigDetect != weak_sig)
++		ath9k_hw_ani_control(ah, ATH9K_ANI_OFDM_WEAK_SIGNAL_DETECTION,
++				     weak_sig);
++
++	if (!AR_SREV_9300_20_OR_LATER(ah))
++		return;
+ 
+ 	if (aniState->ofdmNoiseImmunityLevel >= ATH9K_ANI_OFDM_DEF_LEVEL) {
+ 		ah->config.ofdm_trig_high = ATH9K_ANI_OFDM_TRIG_HIGH;
+@@ -308,17 +318,6 @@ void ath9k_ani_reset(struct ath_hw *ah, 
+ 	BUG_ON(aniState == NULL);
+ 	ah->stats.ast_ani_reset++;
+ 
+-	/* only allow a subset of functions in AP mode */
+-	if (ah->opmode == NL80211_IFTYPE_AP) {
+-		if (IS_CHAN_2GHZ(chan)) {
+-			ah->ani_function = (ATH9K_ANI_SPUR_IMMUNITY_LEVEL |
+-					    ATH9K_ANI_FIRSTEP_LEVEL);
+-			if (AR_SREV_9300_20_OR_LATER(ah))
+-				ah->ani_function |= ATH9K_ANI_MRC_CCK;
+-		} else
+-			ah->ani_function = 0;
+-	}
+-
+ 	ofdm_nil = max_t(int, ATH9K_ANI_OFDM_DEF_LEVEL,
+ 			 aniState->ofdmNoiseImmunityLevel);
+ 	cck_nil = max_t(int, ATH9K_ANI_CCK_DEF_LEVEL,
+@@ -483,10 +482,17 @@ void ath9k_hw_ani_init(struct ath_hw *ah
+ 
+ 	ath_dbg(common, ANI, "Initialize ANI\n");
+ 
+-	ah->config.ofdm_trig_high = ATH9K_ANI_OFDM_TRIG_HIGH;
+-	ah->config.ofdm_trig_low = ATH9K_ANI_OFDM_TRIG_LOW;
+-	ah->config.cck_trig_high = ATH9K_ANI_CCK_TRIG_HIGH;
+-	ah->config.cck_trig_low = ATH9K_ANI_CCK_TRIG_LOW;
++	if (AR_SREV_9300_20_OR_LATER(ah)) {
++		ah->config.ofdm_trig_high = ATH9K_ANI_OFDM_TRIG_HIGH;
++		ah->config.ofdm_trig_low = ATH9K_ANI_OFDM_TRIG_LOW;
++		ah->config.cck_trig_high = ATH9K_ANI_CCK_TRIG_HIGH;
++		ah->config.cck_trig_low = ATH9K_ANI_CCK_TRIG_LOW;
++	} else {
++		ah->config.ofdm_trig_high = ATH9K_ANI_OFDM_TRIG_HIGH_OLD;
++		ah->config.ofdm_trig_low = ATH9K_ANI_OFDM_TRIG_LOW_OLD;
++		ah->config.cck_trig_high = ATH9K_ANI_CCK_TRIG_HIGH_OLD;
++		ah->config.cck_trig_low = ATH9K_ANI_CCK_TRIG_LOW_OLD;
++	}
+ 
+ 	ani->spurImmunityLevel = ATH9K_ANI_SPUR_IMMUNE_LVL;
+ 	ani->firstepLevel = ATH9K_ANI_FIRSTEP_LVL;
+--- a/drivers/net/wireless/ath/ath9k/ani.h
++++ b/drivers/net/wireless/ath/ath9k/ani.h
+@@ -22,12 +22,16 @@
+ /* units are errors per second */
+ #define ATH9K_ANI_OFDM_TRIG_HIGH           3500
+ #define ATH9K_ANI_OFDM_TRIG_HIGH_BELOW_INI 1000
++#define ATH9K_ANI_OFDM_TRIG_HIGH_OLD       500
+ 
+ #define ATH9K_ANI_OFDM_TRIG_LOW           400
+ #define ATH9K_ANI_OFDM_TRIG_LOW_ABOVE_INI 900
++#define ATH9K_ANI_OFDM_TRIG_LOW_OLD       200
+ 
+ #define ATH9K_ANI_CCK_TRIG_HIGH           600
++#define ATH9K_ANI_CCK_TRIG_HIGH_OLD       200
+ #define ATH9K_ANI_CCK_TRIG_LOW            300
++#define ATH9K_ANI_CCK_TRIG_LOW_OLD        100
+ 
+ #define ATH9K_ANI_SPUR_IMMUNE_LVL         3
+ #define ATH9K_ANI_FIRSTEP_LVL             2
+--- a/drivers/net/wireless/ath/ath9k/ar5008_phy.c
++++ b/drivers/net/wireless/ath/ath9k/ar5008_phy.c
+@@ -26,10 +26,6 @@ static const int firstep_table[] =
+ /* level:  0   1   2   3   4   5   6   7   8  */
+ 	{ -4, -2,  0,  2,  4,  6,  8, 10, 12 }; /* lvl 0-8, default 2 */
+ 
+-static const int cycpwrThr1_table[] =
+-/* level:  0   1   2   3   4   5   6   7   8  */
+-	{ -6, -4, -2,  0,  2,  4,  6,  8 };     /* lvl 0-7, default 3 */
+-
+ /*
+  * register values to turn OFDM weak signal detection OFF
+  */
+@@ -921,7 +917,7 @@ static bool ar5008_hw_ani_control_new(st
+ 	struct ath_common *common = ath9k_hw_common(ah);
+ 	struct ath9k_channel *chan = ah->curchan;
+ 	struct ar5416AniState *aniState = &ah->ani;
+-	s32 value, value2;
++	s32 value;
+ 
+ 	switch (cmd & ah->ani_function) {
+ 	case ATH9K_ANI_OFDM_WEAK_SIGNAL_DETECTION:{
+@@ -1008,42 +1004,11 @@ static bool ar5008_hw_ani_control_new(st
+ 	case ATH9K_ANI_FIRSTEP_LEVEL:{
+ 		u32 level = param;
+ 
+-		if (level >= ARRAY_SIZE(firstep_table)) {
+-			ath_dbg(common, ANI,
+-				"ATH9K_ANI_FIRSTEP_LEVEL: level out of range (%u > %zu)\n",
+-				level, ARRAY_SIZE(firstep_table));
+-			return false;
+-		}
+-
+-		/*
+-		 * make register setting relative to default
+-		 * from INI file & cap value
+-		 */
+-		value = firstep_table[level] -
+-			firstep_table[ATH9K_ANI_FIRSTEP_LVL] +
+-			aniState->iniDef.firstep;
+-		if (value < ATH9K_SIG_FIRSTEP_SETTING_MIN)
+-			value = ATH9K_SIG_FIRSTEP_SETTING_MIN;
+-		if (value > ATH9K_SIG_FIRSTEP_SETTING_MAX)
+-			value = ATH9K_SIG_FIRSTEP_SETTING_MAX;
++		value = level * 2;
+ 		REG_RMW_FIELD(ah, AR_PHY_FIND_SIG,
+-			      AR_PHY_FIND_SIG_FIRSTEP,
+-			      value);
+-		/*
+-		 * we need to set first step low register too
+-		 * make register setting relative to default
+-		 * from INI file & cap value
+-		 */
+-		value2 = firstep_table[level] -
+-			 firstep_table[ATH9K_ANI_FIRSTEP_LVL] +
+-			 aniState->iniDef.firstepLow;
+-		if (value2 < ATH9K_SIG_FIRSTEP_SETTING_MIN)
+-			value2 = ATH9K_SIG_FIRSTEP_SETTING_MIN;
+-		if (value2 > ATH9K_SIG_FIRSTEP_SETTING_MAX)
+-			value2 = ATH9K_SIG_FIRSTEP_SETTING_MAX;
+-
++			      AR_PHY_FIND_SIG_FIRSTEP, value);
+ 		REG_RMW_FIELD(ah, AR_PHY_FIND_SIG_LOW,
+-			      AR_PHY_FIND_SIG_FIRSTEP_LOW, value2);
++			      AR_PHY_FIND_SIG_FIRSTEP_LOW, value);
+ 
+ 		if (level != aniState->firstepLevel) {
+ 			ath_dbg(common, ANI,
+@@ -1060,7 +1025,7 @@ static bool ar5008_hw_ani_control_new(st
+ 				aniState->firstepLevel,
+ 				level,
+ 				ATH9K_ANI_FIRSTEP_LVL,
+-				value2,
++				value,
+ 				aniState->iniDef.firstepLow);
+ 			if (level > aniState->firstepLevel)
+ 				ah->stats.ast_ani_stepup++;
+@@ -1073,41 +1038,13 @@ static bool ar5008_hw_ani_control_new(st
+ 	case ATH9K_ANI_SPUR_IMMUNITY_LEVEL:{
+ 		u32 level = param;
+ 
+-		if (level >= ARRAY_SIZE(cycpwrThr1_table)) {
+-			ath_dbg(common, ANI,
+-				"ATH9K_ANI_SPUR_IMMUNITY_LEVEL: level out of range (%u > %zu)\n",
+-				level, ARRAY_SIZE(cycpwrThr1_table));
+-			return false;
+-		}
+-		/*
+-		 * make register setting relative to default
+-		 * from INI file & cap value
+-		 */
+-		value = cycpwrThr1_table[level] -
+-			cycpwrThr1_table[ATH9K_ANI_SPUR_IMMUNE_LVL] +
+-			aniState->iniDef.cycpwrThr1;
+-		if (value < ATH9K_SIG_SPUR_IMM_SETTING_MIN)
+-			value = ATH9K_SIG_SPUR_IMM_SETTING_MIN;
+-		if (value > ATH9K_SIG_SPUR_IMM_SETTING_MAX)
+-			value = ATH9K_SIG_SPUR_IMM_SETTING_MAX;
++		value = (level + 1) * 2;
+ 		REG_RMW_FIELD(ah, AR_PHY_TIMING5,
+-			      AR_PHY_TIMING5_CYCPWR_THR1,
+-			      value);
++			      AR_PHY_TIMING5_CYCPWR_THR1, value);
+ 
+-		/*
+-		 * set AR_PHY_EXT_CCA for extension channel
+-		 * make register setting relative to default
+-		 * from INI file & cap value
+-		 */
+-		value2 = cycpwrThr1_table[level] -
+-			 cycpwrThr1_table[ATH9K_ANI_SPUR_IMMUNE_LVL] +
+-			 aniState->iniDef.cycpwrThr1Ext;
+-		if (value2 < ATH9K_SIG_SPUR_IMM_SETTING_MIN)
+-			value2 = ATH9K_SIG_SPUR_IMM_SETTING_MIN;
+-		if (value2 > ATH9K_SIG_SPUR_IMM_SETTING_MAX)
+-			value2 = ATH9K_SIG_SPUR_IMM_SETTING_MAX;
+-		REG_RMW_FIELD(ah, AR_PHY_EXT_CCA,
+-			      AR_PHY_EXT_TIMING5_CYCPWR_THR1, value2);
++		if (IS_CHAN_HT40(ah->curchan))
++			REG_RMW_FIELD(ah, AR_PHY_EXT_CCA,
++				      AR_PHY_EXT_TIMING5_CYCPWR_THR1, value);
+ 
+ 		if (level != aniState->spurImmunityLevel) {
+ 			ath_dbg(common, ANI,
+@@ -1124,7 +1061,7 @@ static bool ar5008_hw_ani_control_new(st
+ 				aniState->spurImmunityLevel,
+ 				level,
+ 				ATH9K_ANI_SPUR_IMMUNE_LVL,
+-				value2,
++				value,
+ 				aniState->iniDef.cycpwrThr1Ext);
+ 			if (level > aniState->spurImmunityLevel)
+ 				ah->stats.ast_ani_spurup++;

@@ -1,0 +1,23 @@
+Source-Makefile: package/network/ipv6/odhcp6c/Makefile
+Package: odhcp6c
+Version: 2014-03-13-9c7c654cb2d5ac6ac536f603cd5a9372416e91da
+Depends: +libc +USE_EGLIBC:librt +USE_EGLIBC:libpthread +kmod-ipv6
+Menu-Depends: 
+Provides: 
+Section: net
+Category: Network
+Title: Embedded DHCPv6-client for OpenWrt
+Maintainer: Steven Barth <steven@midlink.org>
+Source: odhcp6c-2014-03-13.tar.bz2
+Type: ipkg
+Description: Embedded DHCPv6-client for OpenWrt
+Steven Barth <steven@midlink.org>
+@@
+Config:
+  config PACKAGE_odhcp6c_ext_prefix_class
+    int "Prefix Class Extension ID (0 = disabled)"
+    depends on PACKAGE_odhcp6c
+    default 0
+@@
+
+

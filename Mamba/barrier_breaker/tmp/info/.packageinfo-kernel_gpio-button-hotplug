@@ -1,0 +1,18 @@
+Source-Makefile: package/kernel/gpio-button-hotplug/Makefile
+Package: kmod-gpio-button-hotplug
+Submenu: Other modules
+Version: <LINUX_VERSION>-1
+Depends: @!LINUX_3_3
+Menu-Depends: 
+Provides: 
+Section: kernel
+Category: Kernel modules
+Title: Simple GPIO Button Hotplug driver
+Maintainer: 
+Source: 
+Type: ipkg
+Description: Simple GPIO Button Hotplug driver
+
+@@
+
+

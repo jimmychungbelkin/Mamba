@@ -8,11 +8,11 @@ include $(TOPDIR)/rules.mk
 
 ARCH:=mipsel
 BOARD:=brcm47xx
-BOARDNAME:=Broadcom BCM947xx/953xx
+BOARDNAME:=Broadcom BCM47xx/53xx (MIPS)
 FEATURES:=squashfs usb pcmcia
 MAINTAINER:=Hauke Mehrtens <hauke@hauke-m.de>
 
-LINUX_VERSION:=3.10.28
+LINUX_VERSION:=3.10.32
 
 include $(INCLUDE_DIR)/target.mk
 DEFAULT_PACKAGES += swconfig wpad-mini nvram \

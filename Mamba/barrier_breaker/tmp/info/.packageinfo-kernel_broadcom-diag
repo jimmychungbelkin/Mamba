@@ -1,0 +1,18 @@
+Source-Makefile: package/kernel/broadcom-diag/Makefile
+Package: kmod-diag
+Submenu: Other modules
+Version: <LINUX_VERSION>-11
+Depends: @TARGET_brcm47xx @!LINUX_3_14
+Menu-Depends: 
+Provides: 
+Section: kernel
+Category: Kernel modules
+Title: Driver for router LEDs and Buttons
+Maintainer: 
+Source: 
+Type: ipkg
+Description:  Kernel modules for Broadcom LED and Button driver
+
+@@
+
+

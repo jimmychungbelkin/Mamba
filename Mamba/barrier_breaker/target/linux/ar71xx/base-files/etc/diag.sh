@@ -113,6 +113,12 @@ get_status_led() {
 	rb-750)
 		status_led="rb750:green:act"
 		;;
+	rb-911g-2hpnd|\
+	rb-911g-5hpnd|\
+	rb-912uag-2hpnd|\
+	rb-912uag-5hpnd)
+		status_led="rb:green:user"
+		;;
 	routerstation | routerstation-pro)
 		status_led="ubnt:green:rf"
 		;;
@@ -160,6 +166,7 @@ get_status_led() {
 		status_led="tp-link:green:system"
 		;;
 	archer-c7 | \
+	tl-wdr4900-v2 | \
 	tl-mr10u | \
 	tl-mr13u | \
 	tl-wdr4300 | \

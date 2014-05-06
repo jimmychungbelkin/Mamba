@@ -39,6 +39,15 @@ include $(INCLUDE_DIR)/host.mk
 include $(INCLUDE_DIR)/unpack.mk
 include $(INCLUDE_DIR)/depends.mk
 
+find_library_dependencies = $(wildcard $(patsubst %,$(STAGING_DIR)/pkginfo/%.version, \
+	$(filter-out $(BUILD_PACKAGES),$(foreach dep, \
+		$(filter-out @%, $(patsubst +%,%,$(1))), \
+		$(if $(findstring :,$(dep)), \
+			$(word 2,$(subst :,$(space),$(dep))), \
+			$(dep) \
+		) \
+	))))
+
 STAMP_NO_AUTOREBUILD=$(wildcard $(PKG_BUILD_DIR)/.no_autorebuild)
 PREV_STAMP_PREPARED:=$(if $(STAMP_NO_AUTOREBUILD),$(wildcard $(PKG_BUILD_DIR)/.prepared*))
 ifneq ($(PREV_STAMP_PREPARED),)
@@ -73,7 +82,7 @@ override MAKEFLAGS=
 CONFIG_SITE:=$(INCLUDE_DIR)/site/$(REAL_GNU_TARGET_NAME)
 CUR_MAKEFILE:=$(filter-out Makefile,$(firstword $(MAKEFILE_LIST)))
 SUBMAKE:=$(NO_TRACE_MAKE) $(if $(CUR_MAKEFILE),-f $(CUR_MAKEFILE))
-PKG_CONFIG_PATH=$(STAGING_DIR)/usr/lib/pkgconfig
+PKG_CONFIG_PATH=$(STAGING_DIR)/usr/lib/pkgconfig:$(STAGING_DIR)/usr/share/pkgconfig
 unexport QUIET
 
 ifeq ($(DUMP)$(filter prereq clean refresh update,$(MAKECMDGOALS)),)
@@ -226,6 +235,9 @@ define Package/$(1)/description
 	$(TITLE)
 endef
 endif
+
+  BUILD_PACKAGES += $(1)
+  $(STAMP_PREPARED): $$(if $(QUILT)$(DUMP),,$(call find_library_dependencies,$(DEPENDS)))
 
   $(foreach FIELD, TITLE CATEGORY SECTION VERSION,
     ifeq ($($(FIELD)),)

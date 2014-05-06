@@ -1,13 +1,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ubox
-PKG_VERSION:=2014-01-29
+PKG_VERSION:=2014-03-18
 PKG_RELEASE=$(PKG_SOURCE_VERSION)
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=git://nbd.name/luci2/ubox.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=71ea854364833c5dcb0800e092b45fed2c45910e
+PKG_SOURCE_VERSION:=1015c3779f37a17c6a2512bfc817e56d3042a237
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 CMAKE_INSTALL:=1
 
@@ -28,22 +28,13 @@ define Package/ubox
   TITLE:=OpenWrt system helper toolbox
 endef
 
-define Package/block-mount
-  SECTION:=base
-  CATEGORY:=Base system
-  TITLE:=Block device mounting and checking
-  DEPENDS:=+ubox +libubox +libuci
-endef
-
 define Package/ubox/install
 	$(INSTALL_DIR) $(1)/sbin $(1)/usr/sbin $(1)/lib/ $(1)/etc/init.d/
 
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/{mount_root,kmodloader,logd,logread,validate_data} $(1)/sbin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/{kmodloader,logd,logread,validate_data} $(1)/sbin/
 	$(INSTALL_BIN) ./files/log.init $(1)/etc/init.d/log
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libvalidate.so $(1)/lib
-	ln -s /sbin/mount_root $(1)/sbin/switch2jffs
-	ln -s /sbin/mount_root $(1)/sbin/jffs2reset
-	ln -s /sbin/mount_root $(1)/sbin/jffs2mark
+
 	ln -s /sbin/kmodloader $(1)/usr/sbin/rmmod
 	ln -s /sbin/kmodloader $(1)/usr/sbin/insmod
 	ln -s /sbin/kmodloader $(1)/usr/sbin/lsmod
@@ -51,18 +42,4 @@ define Package/ubox/install
 	ln -s /sbin/kmodloader $(1)/usr/sbin/modprobe
 endef
 
-define Package/block-mount/install
-	$(INSTALL_DIR) $(1)/sbin $(1)/usr/sbin $(1)/etc/hotplug.d/block $(1)/etc/init.d/ $(1)/etc/uci-defaults/
-
-	$(INSTALL_BIN) ./files/fstab.init $(1)/etc/init.d/fstab
-	$(INSTALL_DATA) ./files/fstab.default $(1)/etc/uci-defaults/10-fstab
-	$(INSTALL_DATA) ./files/mount.hotplug $(1)/etc/hotplug.d/block/10-mount
-
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/block $(1)/sbin/
-	ln -s /sbin/block $(1)/usr/sbin/swapon
-	ln -s /sbin/block $(1)/usr/sbin/swapoff
-
-endef
-
 $(eval $(call BuildPackage,ubox))
-$(eval $(call BuildPackage,block-mount))

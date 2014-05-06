@@ -674,14 +674,7 @@ sub gen_package_mk() {
 
 		next if defined $pkg->{vdepends};
 
-		if ($ENV{SDK}) {
-			$conf{$pkg->{src}} or do {
-				$config = 'm';
-				$conf{$pkg->{src}} = 1;
-			};
-		} else {
-			$config = "\$(CONFIG_PACKAGE_$name)"
-		}
+		$config = "\$(CONFIG_PACKAGE_$name)";
 		if ($config) {
 			$pkg->{buildonly} and $config = "";
 			print "package-$config += $pkg->{subdir}$pkg->{src}\n";
@@ -781,9 +774,10 @@ sub gen_package_mk() {
 				} elsif (defined($srcpackage{$dep})) {
 					$idx = $subdir{$dep}.$dep;
 				}
-				$idx .= $suffix;
 				undef $idx if $idx eq 'base-files';
 				if ($idx) {
+					$idx .= $suffix;
+
 					my $depline;
 					next if $pkg->{src} eq $pkg_dep->{src}.$suffix;
 					next if $dep{$condition.":".$pkg->{src}."->".$idx};

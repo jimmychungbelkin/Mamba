@@ -1,0 +1,17 @@
+Source-Makefile: package/system/ubox/Makefile
+Package: ubox
+Version: 2014-03-18-1015c3779f37a17c6a2512bfc817e56d3042a237
+Depends: +libc +USE_EGLIBC:librt +USE_EGLIBC:libpthread +libubox +ubusd +ubus +libuci
+Menu-Depends: 
+Provides: 
+Section: base
+Category: Base system
+Title: OpenWrt system helper toolbox
+Maintainer: John Crispin <blogic@openwrt.org>
+Source: ubox-2014-03-18-1015c3779f37a17c6a2512bfc817e56d3042a237.tar.gz
+Type: ipkg
+Description: OpenWrt system helper toolbox
+John Crispin <blogic@openwrt.org>
+@@
+
+

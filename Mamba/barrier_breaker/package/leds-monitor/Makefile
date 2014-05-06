@@ -16,7 +16,7 @@ define Package/leds-monitor
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Mamba board utilities
-  MAINTAINER:=Tom LV <tom.lv@ledsystems.com>
+  MAINTAINER:=Belkin Inc.
   DEPENDS:=+libpthread
 endef
 

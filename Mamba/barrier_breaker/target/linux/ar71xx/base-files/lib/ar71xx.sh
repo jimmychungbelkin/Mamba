@@ -183,6 +183,9 @@ tplink_board_detect() {
 	"431000"*)
 		model="TP-Link TL-WDR4310"
 		;;
+	"49000002")
+		model="TP-Link TL-WDR4900"
+		;;
 	"453000"*)
 		model="MERCURY MW4530R"
 		;;
@@ -396,6 +399,18 @@ ar71xx_board_detect() {
 	*"RouterBOARD 751G")
 		name="rb-751g"
 		;;
+	*"RouterBOARD 911G-2HPnD")
+		name="rb-911g-2hpnd"
+		;;
+	*"RouterBOARD 911G-5HPnD")
+		name="rb-911g-5hpnd"
+		;;
+	*"RouterBOARD 912UAG-2HPnD")
+		name="rb-912uag-2hpnd"
+		;;
+	*"RouterBOARD 912UAG-5HPnD")
+		name="rb-912uag-5hpnd"
+		;;
 	*"RouterBOARD 951G-2HnD")
 		name="rb-951g-2hnd"
 		;;
@@ -494,6 +509,9 @@ ar71xx_board_detect() {
 		;;
 	*"TL-WDR3600/4300/4310")
 		name="tl-wdr4300"
+		;;
+	*"TL-WDR4900 v2")
+		name="tl-wdr4900-v2"
 		;;
 	*TL-WR741ND)
 		name="tl-wr741nd"

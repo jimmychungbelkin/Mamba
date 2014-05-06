@@ -1,0 +1,19 @@
+Source-Makefile: target/linux/avr32/Makefile
+Target: avr32
+Target-Board: avr32
+Target-Name: Atmel AVR32
+Target-Path: /media/disk100/mamba/from_ftp_server/mamba-openwrt-v4.3_rc
+Target-Arch: avr32
+Target-Arch-Packages: avr32
+Target-Features: gpio rtc squashfs
+Target-Depends: 
+Target-Optimization: -Os -pipe
+CPU-Type: 
+Linux-Version: 3.10.32
+Linux-Release: 1
+Linux-Kernel-Arch: avr32
+Target-Description:
+  Build firmware images for ATNGW100 board
+@@
+Default-Packages: base-files libc libgcc busybox dropbear mtd uci opkg netifd fstools dnsmasq iptables ip6tables ppp ppp-mod-pppoe kmod-ipt-nathelper firewall odhcpd odhcp6c 
+
