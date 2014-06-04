@@ -1,0 +1,26 @@
+Source-Makefile: feeds/packages/net/openconnect/Makefile
+Package: openconnect
+Submenu: VPN
+Version: 5.03-1
+Depends: +libc +USE_EGLIBC:librt +USE_EGLIBC:libpthread +libxml2 +kmod-tun +resolveip +OPENCONNECT_OPENSSL:libopenssl +OPENCONNECT_GNUTLS:libgnutls
+Menu-Depends: 
+Provides: 
+Section: net
+Category: Network
+Title: VPN client for Cisco's AnyConnect SSL VPN
+Maintainer: 
+Source: openconnect-5.03.tar.gz
+Type: ipkg
+Description: 	A VPN client compatible with Cisco's AnyConnect SSL VPN and ocserv.
+
+        OpenConnect is a client for Cisco's AnyConnect SSL VPN, which is
+        supported by IOS 12.4(9)T or later on Cisco SR500, 870, 880, 1800, 2800,
+        3800, 7200 Series and Cisco 7301 Routers.
+http://www.infradead.org/openconnect/
+
+@@
+Config:
+	source "feeds/packages/net/openconnect/Config.in"
+@@
+
+

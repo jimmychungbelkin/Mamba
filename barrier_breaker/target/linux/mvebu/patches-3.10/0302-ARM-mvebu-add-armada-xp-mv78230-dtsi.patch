@@ -1,0 +1,12 @@
+diff --git a/arch/arm/boot/dts/armada-xp-mv78230.dtsi b/arch/arm/boot/dts/armada-xp-mv78230.dtsi
+index 7462762..131a048 100644
+--- a/arch/arm/boot/dts/armada-xp-mv78230.dtsi
++++ b/arch/arm/boot/dts/armada-xp-mv78230.dtsi
+@@ -197,7 +197,6 @@
+ 				interrupts = <87>, <88>, <89>;
+ 			};
+ 
+-			/*
+ 		};
+ 	};
+ };

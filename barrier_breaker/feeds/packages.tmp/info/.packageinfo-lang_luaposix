@@ -1,0 +1,21 @@
+Source-Makefile: feeds/packages/lang/luaposix/Makefile
+Package: luaposix
+Submenu: Lua
+Version: v31-1
+Depends: +libc +USE_EGLIBC:librt +USE_EGLIBC:libpthread +lua +librt +luabitop
+Menu-Depends: 
+Provides: 
+Build-Depends: +lua/host
+Section: lang
+Category: Languages
+Title: luaposix
+Maintainer: 
+Source: release-v31.tar.gz
+Type: ipkg
+Description:   luaposix is a general POSIX library for Lua providing access
+  to various low level libc functions.
+http://luaforge.net/projects/luaposix/
+
+@@
+
+

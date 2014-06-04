@@ -1,0 +1,16 @@
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 2a7a0b2..dc9d713 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -1776,7 +1776,11 @@ static int pxa3xx_nand_probe(struct platform_device *pdev)
+ 		 * parameter. This name cannot be changed or otherwise
+ 		 * user's mtd partitions configuration would get broken.
+ 		 */
++#ifdef CONFIG_MACH_ARMADA_MAMBA
++		mtd->name = "armada-nand";
++#else
+ 		mtd->name = "pxa3xx_nand-0";
++#endif
+ 		info->cs = cs;
+ 		ret = pxa3xx_nand_scan(mtd);
+ 		if (ret) {
