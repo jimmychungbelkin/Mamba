@@ -1,6 +1,8 @@
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index f0895c5..8cb000b 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -94,6 +94,7 @@ dtb-$(CONFIG_ARCH_MSM) += msm8660-surf.d
+@@ -94,6 +94,7 @@ dtb-$(CONFIG_ARCH_MSM) += msm8660-surf.dtb \
  dtb-$(CONFIG_ARCH_MVEBU) += armada-370-db.dtb \
  	armada-370-mirabox.dtb \
  	armada-370-rd.dtb \
@@ -8,11 +10,14 @@
  	armada-xp-db.dtb \
  	armada-xp-gp.dtb \
  	armada-xp-openblocks-ax3-4.dtb
+diff --git a/arch/arm/boot/dts/armada-xp-mamba.dts b/arch/arm/boot/dts/armada-xp-mamba.dts
+new file mode 100644
+index 0000000..8f4b24f
 --- /dev/null
 +++ b/arch/arm/boot/dts/armada-xp-mamba.dts
-@@ -0,0 +1,172 @@
+@@ -0,0 +1,159 @@
 +/*
-+ * Device Tree file for Marvell Belkin Mamba.
++ * Device Tree file for Linksys Mamba (WRT1900AC).
 + *
 + * Note: this board is shipped with a new generation boot loader that
 + * remaps internal registers at 0xf1000000. Therefore, if earlyprintk
@@ -32,8 +37,8 @@
 +#include "armada-xp-mv78230.dtsi"
 +
 +/ {
-+	model = "Marvell Belkin Mamba";
-+	compatible = "marvell,mamba", "marvell,armadaxp-mv78230", "marvell,armadaxp", "marvell,armada-370-xp";
++	model = "Linksys Mamba (WRT1900AC)";
++	compatible = "linksys,mamba", "marvell,armadaxp-mv78230", "marvell,armadaxp", "marvell,armada-370-xp";
 +
 +	chosen {
 +		bootargs = "console=ttyS0,115200 earlyprintk";
@@ -72,8 +77,8 @@
 +
 +		internal-regs {
 +			pinctrl {
-+				pinctrl-0 = <&pmx_phy_int>;
-+				pinctrl-names = "default";
++				/*pinctrl-0 = <&pmx_keys>;*/
++				/*pinctrl-names = "default";*/
 +
 +				pmx_ge0: pmx-ge0 {
 +					marvell,pins = "mpp0", "mpp1", "mpp2", "mpp3",
@@ -90,18 +95,13 @@
 +				};
 +
 +				pmx_keys: pmx-keys {
-+					marvell,pins = "mpp33";
++					marvell,pins = "mpp32", "mpp33";
 +					marvell,function = "gpio";
 +				};
 +
 +				pmx_spi: pmx-spi {
 +					marvell,pins = "mpp36", "mpp37", "mpp38", "mpp39";
 +					marvell,function = "spi";
-+				};
-+
-+				pmx_phy_int: pmx-phy-int {
-+					marvell,pins = "mpp32";
-+					marvell,function = "gpio";
 +				};
 +			};
 +
@@ -116,34 +116,20 @@
 +			};
 +
 +			sata@a0000 {
++				compatible = "marvell,armada-370-sata";
 +				nr-ports = <1>;
 +				status = "okay";
 +			};
 +
-+			mdio {
-+				phy0: ethernet-phy@0 {
-+					reg = <0>;
-+				};
++                        /* Front USB 2.0 port */
++                        usb@50000 {
++                                status = "okay";
++                        };
 +
-+				phy1: ethernet-phy@1 {
-+					reg = <1>;
-+				};
-+			};
-+
-+			ethernet@70000 {
-+				pinctrl-0 = <&pmx_ge0>;
-+				pinctrl-names = "default";
++			i2c@11000 {
 +				status = "okay";
-+				phy = <&phy0>;
-+				phy-mode = "rgmii-id";
-+			};
-+			ethernet@74000 {
-+				pinctrl-0 = <&pmx_ge1>;
-+				pinctrl-names = "default";
-+				status = "okay";
-+				phy = <&phy1>;
-+				phy-mode = "rgmii-id";
-+			};
++				clock-frequency = <175000>;
++                        };
 +
 +			nand@d0000 {
 +				status = "okay";
@@ -177,8 +163,14 @@
 +		pinctrl-names = "default";
 +
 +		button@1 {
++                        label = "WPS Button";
++                        linux,code = <0x211>; /* WPS_SETUP */
++                        gpios = <&gpio1 0 1>;
++                };
++
++		button@2 {
 +			label = "Factory Reset Button";
-+			linux,code = <141>; /* KEY_SETUP */
++			linux,code = <0x198>; /* KEY_SETUP */
 +			gpios = <&gpio1 1 1>;
 +		};
 +	};

@@ -1,5 +1,12 @@
 /*
- *  Copyright (c) 2014
+ * Copyright 2014 Belkin Inc.
+ *
+ * Author: Belkin Inc.
+ *
+ * This file is subject to the terms and conditions of version 2 of
+ * the GNU General Public License.  See the file COPYING in the main
+ * directory of this archive for more details.
+ *
  */
 
 #define _GNU_SOURCE /* for asprintf */
@@ -106,9 +113,9 @@ static int usage(void)
 }
 
 void *thread_handler_led(void *arg)
-{	
+{
 	struct timeval start, end;
-	long mtime, secs, usecs;    
+	long mtime, secs, usecs;
 
 	while (1) {
 		if (key != 0) {
@@ -128,12 +135,12 @@ void *thread_handler_led(void *arg)
 
 			if (key == KEY_WPS_BUTTON) {
 				if (mtime >= 2) {
-					/* 
+					/*
  					- Start slow blink WPS_WHITE, is_wps_blink = 1.
 					1. If successful pairing -> WPS_WHITE -> ON, is_wps_blink = 2
 					- Successuful pairing indicator timer expires -> IDLE state is_wps_blink = 0
 					OF WPS_WHITE, WPS_AMBER.
-					2. Else if session overlap no response or other 
+					2. Else if session overlap no response or other
 					WPS-related error within walk time of 2min -> Begin blink WPS_AMBER
 					is_wps_blink = 3
 					- Pairing failure blink timer expires -> IDLE state is_wps_blink = 0
@@ -150,12 +157,12 @@ void *thread_handler_led(void *arg)
 					is_power_blink = 2;
 					system("ledctrl power 255 500 500");
 				}
-			}	
+			}
 		} else {
 			if (is_power_blink != 0) {
 				system("ledctrl power off");
 				is_power_blink = 0;
-			}	
+			}
 		} /* End if */
 		//sleep(1);
 		usleep(1000);
@@ -168,7 +175,7 @@ static int print_events(int fd)
 	struct input_event ev[64];
 	int i, rd;
 	struct timeval start, end;
-	long mtime, secs, usecs;    
+	long mtime, secs, usecs;
 
 	while (1) {
 		rd = read(fd, ev, sizeof(struct input_event) * 64);
@@ -267,7 +274,7 @@ int main (int argc, char **argv)
 		return usage();
 	}
 	device = argv[1];
-		
+
 	err = pthread_create(&pid, NULL, &thread_handler_led, NULL);
 	if (err != 0) {
 		leds_dbg ("\nCan't create thread :[%s]", strerror(err));
@@ -275,10 +282,9 @@ int main (int argc, char **argv)
 	}
 	else
 		leds_dbg ("\nThread created successfully\n");
-	
+
 	return do_capture(device);
 }
 /*
  * END
  * */
-

@@ -1,0 +1,27 @@
+diff --git a/arch/arm/boot/dts/armada-xp-mamba.dts b/arch/arm/boot/dts/armada-xp-mamba.dts
+index 8f4b24f..068e232 100644
+--- a/arch/arm/boot/dts/armada-xp-mamba.dts
++++ b/arch/arm/boot/dts/armada-xp-mamba.dts
+@@ -103,6 +103,22 @@
+ 				status = "okay";
+ 			};
+ 
++			ethernet@70000 {
++				pinctrl-0 = <&pmx_ge0>;
++				pinctrl-names = "default";
++				status = "okay";
++				phy-mode = "rgmii-id";
++				fixed-link = <0 1 1000 0 0>;
++			};
++
++			ethernet@74000 {
++				pinctrl-0 = <&pmx_ge1>;
++				pinctrl-names = "default";
++				status = "okay";
++				phy-mode = "rgmii-id";
++				fixed-link = <1 1 1000 0 0>;
++			};
++
+                         /* Front USB 2.0 port */
+                         usb@50000 {
+                                 status = "okay";

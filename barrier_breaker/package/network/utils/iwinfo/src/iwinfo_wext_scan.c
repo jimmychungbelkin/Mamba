@@ -332,6 +332,35 @@ static inline void wext_fill_entry(struct stream_descr *stream, struct iw_event 
 		 case IWEVGENIE:
 			wext_fill_wpa(event->u.data.pointer, event->u.data.length, e);
 			break;
+		 case IWEVCUSTOM:
+			{
+				char custom[IW_CUSTOM_MAX+1];
+				struct iwinfo_crypto_entry *c = &e->crypto;
+				if((event->u.data.pointer) && (event->u.data.length)) {
+					memcpy(custom, event->u.data.pointer, event->u.data.length);
+					custom[event->u.data.length] = '\0';
+					if (strstr(custom, "WPA_IE"))
+						c->wpa_version += 1;
+					else if (strstr(custom, "WPA2_IE"))
+						c->wpa_version += 2;
+					if (strstr(custom, "Unicast Cipher = AES"))
+						c->pair_ciphers |= IWINFO_CIPHER_CCMP;
+					if (strstr(custom, "Unicast Cipher = TKIP"))
+						c->pair_ciphers |= IWINFO_CIPHER_TKIP;
+					if (strstr(custom, "Multicast Cipher = AES"))
+						c->group_ciphers |= IWINFO_CIPHER_CCMP;
+					if (strstr(custom, "Multicast Cipher = TKIP"))
+						c->group_ciphers |= IWINFO_CIPHER_TKIP;
+					if (c->enabled) {
+						/* default value for elements
+						 * which cannot be derived from
+						 * IWEVCUSTOM */
+						c->auth_algs |= IWINFO_AUTH_OPEN;
+						c->auth_suites |= IWINFO_KMGMT_PSK;
+					}
+				}
+			}
+			break;
 	}
 }
 

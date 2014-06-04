@@ -10,7 +10,7 @@ include $(INCLUDE_DIR)/image.mk
 TARGET_DTBS := armada-xp-db armada-370-db armada-xp-openblocks-ax3-4 armada-370-mirabox \
 		armada-370-rd armada-xp-gp
 
-ifeq ($(SUBTARGET),mamba)
+ifeq ("$(PROFILE)","Mamba")
 TARGET_DTBS := armada-xp-mamba
 JFFS2OPTS += --no-cleanmarkers
 # override add_jffs2_mark
@@ -27,12 +27,14 @@ define Image/mkfs/prepare/default
 	$(INSTALL_DIR) $(TARGET_DIR)/tmp
 	chmod 1777 $(TARGET_DIR)/tmp
 	rm -f $(TARGET_DIR)/sbin/jffs2reset
+	rm -f $(TARGET_DIR)/usr/lib/lua/luci/controller/admin/system.lua
 	rm -f $(TARGET_DIR)/sbin/switch2jffs
 	mv $(TARGET_DIR)/sbin/jffs2reset_mamba $(TARGET_DIR)/sbin/jffs2reset
+	mv $(TARGET_DIR)/usr/lib/lua/luci/controller/admin/system.lua_mamba $(TARGET_DIR)/usr/lib/lua/luci/controller/admin/system.lua
 	mv $(TARGET_DIR)/sbin/switch2jffs_mamba $(TARGET_DIR)/sbin/switch2jffs
 endef
 
-endif # SUBTARGET == mamba
+endif # PROFILE == Mamba
 
 LOADADDR:=0x00008000
 
@@ -67,7 +69,7 @@ define Image/Build/Initramfs
 	$(foreach dtb,$(TARGET_DTBS),$(call Image/Build/DTB,$(dtb),-initramfs))
 endef
 
-ifeq ($(SUBTARGET),mamba)
+ifeq ("$(PROFILE)","Mamba")
 define jffs2-128k-internal
 	if [ `stat -L -c %s $(KDIR)/uImage-$(2)` -lt 3145728 ]; \
 	then \
@@ -80,13 +82,13 @@ define jffs2-128k-internal
 		dd if=$(KDIR)/uImage-$(2) bs=128k conv=sync; \
 		dd if=$(KDIR)/root.$(1) bs=128k conv=sync; \
 	) > $(BIN_DIR)/$(IMG_PREFIX)-$(1).img ; \
-	fi	
+	fi
 endef
 
 define Image/Build/jffs2-128k
 	$(foreach dtb,$(TARGET_DTBS),$(call jffs2-128k-internal,jffs2-128k,$(dtb)))
 endef
-endif # SUBTARGET == mamba
+endif # PROFILE == Mamba
 
 define Image/Build
 	$(call Image/Build/$(1))

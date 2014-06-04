@@ -1,6 +1,8 @@
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 31aae53..2a7a0b2 100644
 --- a/drivers/mtd/nand/pxa3xx_nand.c
 +++ b/drivers/mtd/nand/pxa3xx_nand.c
-@@ -286,6 +286,16 @@ static struct nand_bbt_descr bbt_mirror_
+@@ -286,6 +286,16 @@ static struct nand_bbt_descr bbt_mirror_descr = {
  	.pattern = bbt_mirror_pattern
  };
  
@@ -17,7 +19,7 @@
  static struct nand_ecclayout ecc_layout_4KB_bch4bit = {
  	.eccbytes = 64,
  	.eccpos = {
-@@ -1362,6 +1372,17 @@ static int pxa_ecc_init(struct pxa3xx_na
+@@ -1360,6 +1370,17 @@ static int pxa_ecc_init(struct pxa3xx_nand_info *info,
  	 * Required ECC: 4-bit correction per 512 bytes
  	 * Select: 16-bit correction per 2048 bytes
  	 */

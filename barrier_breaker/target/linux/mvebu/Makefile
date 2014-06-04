@@ -13,7 +13,6 @@ FEATURES:=targz usb pci pcie gpio
 CPU_TYPE:=cortex-a9
 CPU_SUBTYPE:=vfpv3
 MAINTAINER:=Luka Perkov <luka@openwrt.org>
-SUBTARGETS:=generic mamba
 
 LINUX_VERSION:=3.10.32
 
