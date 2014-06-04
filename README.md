@@ -1,7 +1,7 @@
 Added by ThienPham (thien.pham@veriksystems.com) - 28may14
 Changes:
 - 0034-balance-network-interrupt-between-2-cpus.patch
-  employed both methods (smp_affinity and rps). FOr faster WAN to LAN transfers
+  employed both methods (smp_affinity and rps) for faster WAN to LAN transfers
 - 0035-support-wireless-scanning.patch
   Use iwpriv to scan for wireless APs in the WebUI
 - 0032-fstool-support-ntfs-mount.patch 
