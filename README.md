@@ -1,5 +1,6 @@
 Added by ThienPham (thien.pham@veriksystems.com) - 23jul14
-branch attitude_adjustment is created to keep source code V3.9
+
+branch attitude_adjustment is updated to V3.9
 
 
 
