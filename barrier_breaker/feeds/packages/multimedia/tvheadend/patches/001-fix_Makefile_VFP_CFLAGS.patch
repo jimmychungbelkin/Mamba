@@ -1,0 +1,11 @@
+--- a/Makefile
++++ b/Makefile
+@@ -282,7 +282,7 @@ include support/${OSENV}.mk
+ # Bundle files
+ $(BUILDDIR)/bundle.o: $(BUILDDIR)/bundle.c
+ 	@mkdir -p $(dir $@)
+-	$(CC) -I${CURDIR}/src -c -o $@ $<
++	$(CC) $(CFLAGS) -I${CURDIR}/src -c -o $@ $<
+ 
+ $(BUILDDIR)/bundle.c:
+ 	@mkdir -p $(dir $@)

@@ -1,0 +1,32 @@
+From 2806023c2bfe2339818ea3abcf7dfbaa16178cc6 Mon Sep 17 00:00:00 2001
+From: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+Date: Sat, 3 May 2014 23:37:24 +0700
+Subject: [PATCH 03/34] Remove comment out in armada-xp-mv78230-dtsi
+
+Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+---
+ ...0302-ARM-mvebu-add-armada-xp-mv78230-dtsi.patch |   12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+ create mode 100644 target/linux/mvebu/patches-3.10/0302-ARM-mvebu-add-armada-xp-mv78230-dtsi.patch
+
+diff --git a/target/linux/mvebu/patches-3.10/0302-ARM-mvebu-add-armada-xp-mv78230-dtsi.patch b/target/linux/mvebu/patches-3.10/0302-ARM-mvebu-add-armada-xp-mv78230-dtsi.patch
+new file mode 100644
+index 0000000..8b1f991
+--- /dev/null
++++ b/target/linux/mvebu/patches-3.10/0302-ARM-mvebu-add-armada-xp-mv78230-dtsi.patch
+@@ -0,0 +1,12 @@
++diff --git a/arch/arm/boot/dts/armada-xp-mv78230.dtsi b/arch/arm/boot/dts/armada-xp-mv78230.dtsi
++index 7462762..131a048 100644
++--- a/arch/arm/boot/dts/armada-xp-mv78230.dtsi
+++++ b/arch/arm/boot/dts/armada-xp-mv78230.dtsi
++@@ -197,7 +197,6 @@
++ 				interrupts = <87>, <88>, <89>;
++ 			};
++ 
++-			/*
++ 		};
++ 	};
++ };
+-- 
+1.7.9.5
+

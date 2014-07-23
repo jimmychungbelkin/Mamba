@@ -16,12 +16,12 @@ define Package/leds-monitor
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Mamba board utilities
-  MAINTAINER:=Belkin Inc.
+  MAINTAINER:=Tom LV <tom.lv@ledsystems.com>
   DEPENDS:=+libpthread
 endef
 
 define Package/leds-monitor/description
- This package contains some small utility apps which use to monitor the
+ This package contains some small utility apps which use to monitor the 
  leds events, status...
 endef
 
