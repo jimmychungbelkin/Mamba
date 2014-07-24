@@ -1,3 +1,0 @@
-device=`basename $DEVPATH`
-{ echo ${device} | grep -q mtd; } || \
-	/sbin/smb_share.sh "${ACTION}" /dev/${device}
