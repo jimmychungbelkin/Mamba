@@ -1,0 +1,369 @@
+28th May 2014
+
+Belkin Inc. would like to announce the 
+patch submission release for WRT1900AC which is based on 
+OpenWRT trunk, the detail base revision is specified in 
+each release
+
+This is the release version 2.3 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006
+
+Summary all changes on this release:
+ - Balance ethernet interrupt between 2 CPUs.
+ - Fix ntfs detection.
+
+The release includes three packages
+
+Non-wifi patch set includes:
+
+== New patches
+ * 0034-balance-network-interrupt-between-2-cpus.patch 
+
+== Updated patches:
+ * 0032-fstool-support-ntfs-mount.patch 
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * None
+
+GUI patch set includes:
+
+== Updated patches:
+ * None
+
+ -----------------------------------------------------
+This is the release version 2.2 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006
+
+Summary all changes on this release:
+ - Auto mount USB storage devices is supported.
+ - Auto share USB storage devices is supported.
+
+The release includes three packages
+
+Non-wifi patch set includes:
+
+== New patches
+ * 0031-enable-anonymous-mount-by-default-for-automount.patch
+ * 0032-fstool-support-ntfs-mount.patch
+ * 0033-support-auto-share-usb-hot-plug-devices.patch
+
+== Updated patches:
+ * None
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * None
+
+GUI patch set includes:
+
+== Updated patches:
+ * None
+
+ -----------------------------------------------------
+This is the release version 2.1 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006
+
+Summary all changes on this release:
+ - Fix sysupgrade fail when nand device has bad blocks.
+
+The release includes three packages
+
+Non-wifi patch set includes:
+
+== Updated patches:
+ * 0016-mamba-mvebu-sysupgrade-support.patch 
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * None
+
+GUI patch set includes:
+
+== Updated patches:
+ * None
+
+ -----------------------------------------------------
+This is the release version 2.0 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006
+
+Summary all changes on this release:
+ - Remove mamba subtarget, add Linksys-Belkin profile.
+ - Modified target/linux/mvebu/config-3.10 directly for enable a kernel config instead of target/linux/mvebu/mamba/config-default.
+ - Add I2C, USB, TMP421, On-Die sensor, SATA node at the beginning.
+   Enable all those features at kernel config on one patch.
+ - Move private base-files/* to package/linksys-basefiles/*
+ - Rename all filename of patches.
+ - Delete some patches.
+
+The release includes three packages
+
+Non-wifi patch set includes:
+
+== New patches
+ * 0001-add-linksys-mamba-WRT1900AC-build-profile.patch
+ * 0005-support-I2C-USB-TMP421-On-Die-sensor-SATA.patch
+ * 0010-add-linksys-base-files-to-package.patch
+
+== Updated patches:
+ * 0003-add-dts-armadaxp-mamba-board.patch -> 0002-add-dts-armadaxp-mamba-board.patch
+ * 0004-remove-comment-out-in-armada-xp-mv78230-dtsi.patch -> 0003-remove-comment-out-in-armada-xp-mv78230-dtsi.patch
+ * 0005-build-target-for-mamba.patch -> 0004-build-target-for-mamba.patch
+ * 0006-support-nand-device-for-mamba-board.patch
+ * 0007-mamba-mvebu-force-ecc-4bit.patch
+ * 0010-mamba-mvebu-add-jffs2-image-target.patch -> 0008-mamba-mvebu-add-jffs2-image-target.patch
+ * 0011-CONFIG_UBIFS_FS_XATTR-fixed.patch -> 0009-CONFIG_UBIFS_FS_XATTR-fixed.patch
+ * 0012-mamba-mvebu-support-overlay.patch -> 0011-mamba-mvebu-support-overlay.patch
+ * 0035-mamba-mvebu-support-the-switch-88E6172.patch -> 0012-mamba-mvebu-support-the-switch-88E6172.patch
+ * 0014-mamba-mvebu-configure-router-as-default.patch -> 0013-mamba-mvebu-configure-router-as-default.patch
+ * 0018-add-tlc59116-led-driver.patch -> 0014-add-tlc59116-led-driver.patch
+ * 0019-mamba-mvebu-fw_printenv-support.patch -> 0015-mamba-mvebu-fw_printenv-support.patch
+ * 0020-mamba-mvebu-sysupgrade-support.patch -> 0016-mamba-mvebu-sysupgrade-support.patch
+ * 0022-mamba-mvebu-support-switch2jffs.patch -> 0018-mamba-mvebu-support-switch2jffs.patch
+ * 0023-mamba-mvebu-RESET-activity.patch -> 0019-mamba-mvebu-RESET-activity.patch
+ * 0024-mamba-mvebu-led-control-support.patch -> 0020-mamba-mvebu-led-control-support.patch
+ * 0025-mamba-mvebu-support-FAILSAFE.patch -> 0021-mamba-mvebu-support-FAILSAFE.patch
+ * 0021-mamba-mvebu-support-factory-reset.patch -> 0017-mamba-mvebu-support-factory-reset.patch
+ * 0026-mamba-mvebu-Power-led-activity-FAILSAFE.patch -> 0022-mamba-mvebu-Power-led-activity-FAILSAFE.patch
+ * 0028-mamba-mvebu-led-activity.patch -> 0024-mamba-mvebu-led-activity.patch
+ * 0027-mamba-mvebu-script-initialize.patch -> 0023-mamba-mvebu-script-initialize.patch
+ * 0029-mamba-mvebu-support-fan-operation.patch -> 0025-mamba-mvebu-support-fan-operation.patch
+ * 0036-mamba-mvebu-support-wan-led-monitor.patch -> 0030-mamba-mvebu-support-wan-led-monitor.patch
+
+== Deleted patches:
+ * 0001-add-mvbu-mamba-subtarget.patch
+ * 0002-remove-old-mvebu-generic-profile.patch
+ * 0008-support-i2c-for-mamba-board.patch
+ * 0009-support-usb-for-mamba-board.patch
+ * 0013-mamba-mvebu-support-ethernet-dummy-mode.patch
+ * 0015-mamba-mvebu-enable-tmp421-sensor.patch
+ * 0016-mamba-mvebu-enable-ondie-sensor.patch
+ * 0017-mamba-mvebu-add-gpio-wps-reset-button.patch
+ * 0030-enable-sata-mv-driver.patch
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * 0031-mamba-mvebu-support-wifi-non-security.patch -> 0026-mamba-mvebu-support-wifi-non-security.patch
+ * 0032-hostapd-wps-button-wps-led-support.patch -> 0027-hostapd-wps-button-wps-led-support.patch
+
+GUI patch set includes:
+
+== Updated patches:
+ * 0033-add-wifi.lua-to-mrvl_wlan_v7drv-package.patch -> 0028-add-wifi.lua-to-mrvl_wlan_v7drv-package.patch
+ * 0034-mamba-mvebu-support-macclone.patch -> 0029-mamba-mvebu-support-macclone.patch
+
+ -----------------------------------------------------
+This is the release version 1.6 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006
+
+The release includes three packages
+
+Non-wifi patch set includes:
+
+== New patches
+ * 0035-mamba-mvebu-support-the-switch-88E6172.patch: 88E6172 switch driver
+ * 0036-mamba-mvebu-support-wan-led-monitor.patch: WAN LED control scripts 
+
+== Updated patches:
+ * 0014-mamba-mvebu-configure-router-as-default.patch: remove "network.globals" and "network.wan6" config because we did not use IPv6 by default 
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * None
+
+GUI patch set includes:
+
+== Updated patches:
+ * None
+
+ -----------------------------------------------------
+This is the release version 1.5 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006
+
+The release includes three packages
+- The order of all patch files will be change from the patch
+0002-add-dts-armadaxp-mamba-board.patch -> to 0003-... Because we split
+the 0001-add-mvbu-mamba-subtarget.patch patch file into 2 patch files with suggesttion from OpenWRT team.
+- Added Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com> to all patch files.
+
+Non-wifi patch set includes:
+
+== New patches
+ * 0002-remove-old-mvebu-generic-profile.patch: Delete the old profiles.
+
+== Updated patches:
+ * 0001-add-mvbu-mamba-subtarget.patch: Modify this patch which only adds new profile.
+ * 0011-CONFIG_UBIFS_FS_XATTR-fixed.patch: Fix the patch in target/linux/generic/patches-3.10.
+ * 0014-mamba-mvebu-configure-router-as-default.patch: Change to use the uci script to generate the default config.
+ * 0024-mamba-mvebu-led-control-support.patch: Change the way to implement cat /proc/<node>.
+ * 0029-mamba-mvebu-support-fan-operation.patch: Change the way to implement cat /proc/<node>.
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * None
+
+GUI patch set includes:
+
+== New patches
+ * 0034-mamba-mvebu-support-macclone.patch: Support mac clone web UI.
+
+== Updated patches
+ * 0033-add-wifi.lua-to-mrvl_wlan_v7drv-package.patch: Move wifi.lua to 
+package/network/mrvl_wlan_v7drv/ which supports for Marvell WIFI.
+
+ -----------------------------------------------------
+This is the release version 1.4 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006 
+
+The release includes three packages
+
+Non-wifi patch set includes:
+== Updated patches:
+ * 0029-enable-sata-mv-driver.patch: Added the patch file to edit sata compatible.
+
+Wifi-support patch set includes:
+
+== Updated patches:
+ * 0030-mamba-mvebu-support-wifi-non-security.patch: Moved binary files 
+and scripts to package/network/mrvl_wlan_v7drv and select by make menuconfig.
+ * 0031-hostapd-wps-button-wps-led-support.patch: Moved binary files 
+and scripts to package/network/mrvl_wlan_v7drv and select by make menuconfig.
+
+GUI patch set includes:
+
+== New patches
+ * 0032-mamba-mvebu-add-wifi.lua.patch: Overwrite the wifi.lua to support 
+Marvell wireless.
+
+ -----------------------------------------------------
+This is the release version 1.3 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006 
+
+The release includes two packages
+
+Non-wifi patch set includes:
+
+ * 0001-add-mvbu-mamba-subtarget.patch
+ * 0002-add-dts-armadaxp-mamba-board.patch
+ * 0003-remove-comment-out-in-armada-xp-mv78230-dtsi.patch
+ * 0004-build-target-for-mamba.patch
+ * 0005-support-NAND-device-for-Mamba-board.patch
+ * 0006-mamba-mvebu-force-ecc-4bit.patch
+ * 0007-support-i2c-for-mamba-board.patch
+ * 0008-support-usb-for-mamba-board.patch
+ * 0009-mamba-mvebu-add-jffs2-image-target.patch
+ * 0010-CONFIG_UBIFS_FS_XATTR-fixed.patch
+ * 0011-mamba-mvebu-support-overlay.patch
+ * 0012-mamba-mvebu-support-ethernet-dummy-mode.patch
+ * 0013-mamba-mvebu-configure-router-as-default.patch
+ * 0014-mamba-mvebu-enable-tmp421-sensor.patch
+ * 0015-mamba-mvebu-enable-ondie-sensor.patch
+ * 0016-mamba-mvebu-add-gpio-wps-reset-button.patch
+ * 0017-add-tlc59116-led-driver.patch
+ * 0018-mamba-mvebu-fw_printenv-support.patch
+ * 0019-mamba-mvebu-sysupgrade-support.patch
+ * 0020-mamba-mvebu-support-factory-reset.patch
+ * 0021-mamba-mvebu-support-switch2jffs.patch
+ * 0022-mamba-mvebu-RESET-activity.patch
+ * 0023-mamba-mvebu-led-control-support.patch
+ * 0024-mamba-mvebu-support-FAILSAFE.patch
+ * 0025-mamba-mvebu-Power-led-activity-FAILSAFE.patch
+ * 0026-mamba-mvebu-script-initialize.patch
+ * 0027-mamba-mvebu-led-activity.patch
+ * 0028-mamba-mvebu-support-fan-operation.patch
+ * 0029-enable-sata-mv-driver.patch
+
+Wifi-support patch set includes
+
+ * 0030-mamba-mvebu-support-wifi-non-security.patch
+ * 0031-hostapd-wps-button-wps-led-support.patch
+
+ -----------------------------------------------------
+This is the release version 1.2 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006 
+
+The patch set includes:
+
+== Deleted patches:
+ * 0017-mamba-mvebu-support-leds-activity.patch: removed, new led
+control is implemented in 0017-add-tlc59116-led-driver.patch and
+0023-mamba-mvebu-led-control-support.patch 
+ * 0023-mamba-mvebu-fan-script.patch: removed, new fan control is
+implemented in 0028-mamba-mvebu-support-fan-operation.patch 
+
+== Updated patches:
+ * 0025-mamba-mvebu-Power-led-activity-FAILSAFE.patch: no need to
+export GPIO40 because LED driver is moved to kernel space
+ * 0027-mamba-mvebu-led-activity.patch: use a single initialization
+scripts for all WRT1900AC specific init activities.
+ * 0028-mamba-mvebu-support-fan-operation.patch: move Fan control dr-
+iver to kernel space to avoid calling user space script inside kernel.
+ * 0029-enable-sata-mv-driver.patch: modified as a result of previous
+commits change.
+
+== New patches
+ * 0017-add-tlc59116-led-driver.patch: implement tlc59116 led driver
+in this file.
+ * 0023-mamba-mvebu-led-control-support.patch: implement power led
+driver in kernel space.
+ * 0031-hostapd-wps-button-wps-led-support.patch: Added support for
+hostapd, wps button and wps led
+
+ -----------------------------------------------------
+This is the release version 1.1 of WRT1900AC Openwrt patch submission
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006 
+
+The patch set includes:
+ * 0030-mamba-mvebu-support-wifi-non-security.patch
+
+ -----------------------------------------------------
+This is the release version 1.0 of WRT1900AC Openwrt patch submission:
+OpenWRT git base revision: e97be7a104e5c809ae4638cf169823249a505698
+OpenWRT svn base revision: 40006 
+
+The patch set includes:
+ * 0001-add-mvbu-mamba-subtarget.patch
+ * 0002-add-dts-armadaxp-mamba-board.patch
+ * 0003-remove-comment-out-in-armada-xp-mv78230-dtsi.patch
+ * 0004-build-target-for-mamba.patch
+ * 0005-support-NAND-device-for-Mamba-board.patch
+ * 0006-mamba-mvebu-force-ecc-4bit.patch
+ * 0007-support-i2c-for-mamba-board.patch
+ * 0008-support-usb-for-mamba-board.patch
+ * 0009-mamba-mvebu-add-jffs2-image-target.patch
+ * 0010-CONFIG_UBIFS_FS_XATTR-fixed.patch
+ * 0011-mamba-mvebu-support-overlay.patch
+ * 0012-mamba-mvebu-support-ethernet-dummy-mode.patch
+ * 0013-mamba-mvebu-configure-router-as-default.patch
+ * 0014-mamba-mvebu-enable-tmp421-sensor.patch
+ * 0015-mamba-mvebu-enable-ondie-sensor.patch
+ * 0016-mamba-mvebu-add-gpio-wps-reset-button.patch
+ * 0017-mamba-mvebu-support-leds-activity.patch
+ * 0018-mamba-mvebu-fw_printenv-support.patch
+ * 0019-mamba-mvebu-sysupgrade-support.patch
+ * 0020-mamba-mvebu-support-factory-reset.patch
+ * 0021-mamba-mvebu-support-switch2jffs.patch
+ * 0022-mamba-mvebu-RESET-activity.patch
+ * 0023-mamba-mvebu-fan-script.patch
+ * 0024-mamba-mvebu-support-FAILSAFE.patch
+ * 0025-mamba-mvebu-Power-led-activity-FAILSAFE.patch
+ * 0026-mamba-mvebu-script-initialize.patch
+ * 0027-mamba-mvebu-led-activity.patch
+ * 0028-mamba-mvebu-support-fan-operation.patch
+ * 0029-enable-sata-mv-driver.patch

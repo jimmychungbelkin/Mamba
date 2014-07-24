@@ -1,0 +1,59 @@
+From 7d595a327865bb5d518d9d401eb9711dfa7a5c20 Mon Sep 17 00:00:00 2001
+From: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+Date: Sun, 4 May 2014 18:13:05 +0700
+Subject: [PATCH 13/34] add default network configuration for mvebu mamba
+
+mvebu does not use the default /etc/config/network, it generates a
+custom config file on boot up if the config file does not exist yet
+
+Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+---
+ .../files/etc/uci-defaults/02_network              |   23 ++++++++++++++++++++
+ target/linux/mvebu/base-files.mk                   |    5 +++++
+ 2 files changed, 28 insertions(+)
+ create mode 100755 package/linksys-base-files/files/etc/uci-defaults/02_network
+ create mode 100644 target/linux/mvebu/base-files.mk
+
+diff --git a/package/linksys-base-files/files/etc/uci-defaults/02_network b/package/linksys-base-files/files/etc/uci-defaults/02_network
+new file mode 100755
+index 0000000..61788c4
+--- /dev/null
++++ b/package/linksys-base-files/files/etc/uci-defaults/02_network
+@@ -0,0 +1,23 @@
++#!/bin/sh
++#
++# Copyright (C) 2011 OpenWrt.org
++#
++
++[ -e /etc/config/network ] && exit 0
++
++touch /etc/config/network
++
++. /lib/functions/uci-defaults.sh
++
++ucidef_set_interface_loopback
++
++ucidef_set_interface_lan "eth0 wdev0ap0 wdev1ap0"
++ucidef_set_interface_wan "eth1"
++
++uci delete network.globals
++uci delete network.wan6
++
++uci set network.lan.ipaddr=192.168.200.1
++
++uci commit network
++exit 0
+diff --git a/target/linux/mvebu/base-files.mk b/target/linux/mvebu/base-files.mk
+new file mode 100644
+index 0000000..285f64d
+--- /dev/null
++++ b/target/linux/mvebu/base-files.mk
+@@ -0,0 +1,5 @@
++ifeq ("$(PROFILE)","Mamba")
++define Package/base-files/install-target
++	rm -f $(1)/etc/config/network
++endef
++endif
+-- 
+1.7.9.5
+

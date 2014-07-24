@@ -1,0 +1,8 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org 
+
+START=99
+start() {
+	# Run leds_monitor
+	/usr/sbin/sensors_monitor&
+}

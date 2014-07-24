@@ -1,0 +1,46 @@
+From ce4970c28559290c985ade0de6e3d78d26f60fd3 Mon Sep 17 00:00:00 2001
+From: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+Date: Sun, 25 May 2014 15:21:09 +0700
+Subject: [PATCH 34/34] balance network interrupt between 2 cpus
+
+Balance the network interrupts between 2 cpus to get better performance
+
+Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+---
+ .../linksys-base-files/files/etc/init.d/mamba_apps |   22 ++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/package/linksys-base-files/files/etc/init.d/mamba_apps b/package/linksys-base-files/files/etc/init.d/mamba_apps
+index 69e830a..be22272 100755
+--- a/package/linksys-base-files/files/etc/init.d/mamba_apps
++++ b/package/linksys-base-files/files/etc/init.d/mamba_apps
+@@ -10,4 +10,26 @@ start() {
+ 	/usr/sbin/sensors_monitor&
+ 	# Wan monitor 
+ 	/usr/sbin/wan_monitor&
++	# performance tuning
++	echo 1 > /proc/irq/26/smp_affinity
++	echo 2 > /proc/irq/25/smp_affinity
++	# eth0
++	echo 2 > /sys/class/net/eth0/queues/rx-0/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-1/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-2/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-3/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-4/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-5/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-6/rps_cpus
++	echo 2 > /sys/class/net/eth0/queues/rx-7/rps_cpus
++	 
++	# eth1
++	echo 1 > /sys/class/net/eth1/queues/rx-0/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-1/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-2/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-3/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-4/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-5/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-6/rps_cpus
++	echo 1 > /sys/class/net/eth1/queues/rx-7/rps_cpus
+ }
+-- 
+1.7.9.5
+

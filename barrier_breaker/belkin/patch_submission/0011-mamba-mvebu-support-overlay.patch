@@ -1,0 +1,184 @@
+From 6254954bf36a95c79eb6b143424ebdc02101709f Mon Sep 17 00:00:00 2001
+From: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+Date: Sun, 4 May 2014 01:51:07 +0700
+Subject: [PATCH 11/34] mamba mvebu: enable overlay on syscfg partition
+ formatted as ubifs
+
+Mamba use the syscfg partition formatted in ubifs type as the overlay
+partition to store the router configuration. This overlay style is
+different from OpenWRT. To avoid affecting the whole OpenWRT tree, we do
+not modify OpenWRT's block-mount package. Instead, we add a script to
+carry out the overlay on syscfg partition
+
+Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+
+Conflicts:
+
+	target/linux/mvebu/config-3.10
+
+Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+---
+ .../files/lib/preinit/81_mount_ubifs_overlay       |   96 ++++++++++++++++++++
+ target/linux/mvebu/config-3.10                     |   17 ++++
+ 2 files changed, 113 insertions(+)
+ create mode 100644 package/linksys-base-files/files/lib/preinit/81_mount_ubifs_overlay
+
+diff --git a/package/linksys-base-files/files/lib/preinit/81_mount_ubifs_overlay b/package/linksys-base-files/files/lib/preinit/81_mount_ubifs_overlay
+new file mode 100644
+index 0000000..14e1a52
+--- /dev/null
++++ b/package/linksys-base-files/files/lib/preinit/81_mount_ubifs_overlay
+@@ -0,0 +1,96 @@
++#!/bin/sh
++
++SYSCFG_UBIFS_MNT=/tmp/syscfg
++get_current_rootfs_label() {
++	boot_part=`/usr/sbin/fw_printenv -n boot_part`
++	rootfs_label=""
++	if [ "$boot_part" -eq 1 ]
++	then
++		# primary boot image
++		rootfs_label="rootfs"
++	elif [ "$boot_part" -eq 2 ]
++	then
++		# alternative boot image
++		rootfs_label="alt_rootfs"
++	else
++		# try to guess from bootarg, should not come here
++		grep -q "mtdblock5" /proc/cmdline && boot_part=1 \
++			&& rootfs_label="rootfs"
++		grep -q "mtdblock7" /proc/cmdline && boot_part=2 \
++			&& rootfs_label="alt_rootfs"
++		fw_setenv boot_part $boot_part
++	fi
++	echo "$rootfs_label"
++}
++
++mount_no_ubifs_syscfg_mtd() {
++    mtd unlock $(get_current_rootfs_label)
++    mount -o remount,rw /dev/root /
++}
++
++ubifs_syscfg_support() {
++	# return 1 on failed
++	mtdpart="$(find_mtd_part syscfg)"
++	[ -z "$mtdpart" ] && return 1
++	grep -qs ubifs /proc/filesystems ||  return 1
++	mtdpart_idx="$(echo $mtdpart | tr -d "/dev/mtdblock")"
++	[ ! -e $SYSCFG_UBIFS_MNT ] && mkdir -p $SYSCFG_UBIFS_MNT
++	echo "found syscfg partition and ubifs support"
++	return 0
++}
++
++try_ubifs_syscfg_mount() {
++	overlay_mountpoint=$1
++	if [ -z $overlay_mountpoint ]
++	then
++		overlay_mountpoint=/overlay
++	fi
++	recover_ubifs=0
++	[ ! -e /dev/ubi0 ] && ubiattach -m $mtdpart_idx /dev/ubi_ctrl || recover_ubifs=1
++	if [ $recover_ubifs -eq 0 ] 
++	then
++		ubi0_nod_id=`cat /sys/class/ubi/ubi0/dev | tr -s ":" " "`
++		[ ! -e /dev/ubi0 ] && mknod /dev/ubi0 c ${ubi0_nod_id}
++		if [ ! -e /sys/class/ubi/ubi0_0/dev ]
++		then
++			# no volume
++			recover_ubifs=1
++		else
++			# check for "syscfg" volume
++			ubi0_0_nod_id=`cat /sys/class/ubi/ubi0_0/dev | tr -s ":" " "`
++			[ ! -e /dev/ubi0_0 ] && mknod /dev/ubi0_0 c ${ubi0_0_nod_id}
++			{ ubinfo /dev/ubi0_0 | grep Name  | grep -qs "syscfg" ; } || \
++			recover_ubifs=1
++		fi
++	fi
++	if [ $recover_ubifs -eq 1 ]
++	then
++		echo "ubifs syscfg partition is damaged"
++		echo "try to recover by formatting $mtdpart..."
++		[ -e /dev/ubi0 ] && ubidetach -m $mtdpart_idx
++		ubiformat -y -q /dev/mtd$mtdpart_idx
++		ubiattach -m $mtdpart_idx /dev/ubi_ctrl
++		ubi0_nod_id=`cat /sys/class/ubi/ubi0/dev | tr -s ":" " "`
++		[ ! -e /dev/ubi0 ] && mknod /dev/ubi0 c ${ubi0_nod_id}
++		ubimkvol /dev/ubi0 -n 0 -N syscfg -t dynamic --maxavsize
++	fi
++	# finally mount the ubifs
++	mount -t ubifs -o noatime ubi0:syscfg $SYSCFG_UBIFS_MNT || return 1
++	[ ! -d $SYSCFG_UBIFS_MNT/openwrt_overlay ] && mkdir -p $SYSCFG_UBIFS_MNT/openwrt_overlay
++	mount -o bind $SYSCFG_UBIFS_MNT/openwrt_overlay $overlay_mountpoint
++	return 0
++}
++
++ubifs_syscfg_rootfs_pivot() {
++	echo "switching to ubifs sysfs overlay"
++	fopivot /overlay /rom
++	mount -o remount,ro /rom
++}
++
++do_mount_ubifs_overlay() {
++	{ ubifs_syscfg_support && \
++	try_ubifs_syscfg_mount && \
++	ubifs_syscfg_rootfs_pivot ; } || mount_no_ubifs_syscfg_mtd
++}
++
++boot_hook_add preinit_main do_mount_ubifs_overlay
+diff --git a/target/linux/mvebu/config-3.10 b/target/linux/mvebu/config-3.10
+index 2d6ec37..8a6d2c8 100644
+--- a/target/linux/mvebu/config-3.10
++++ b/target/linux/mvebu/config-3.10
+@@ -65,6 +65,9 @@ CONFIG_CPU_RMAP=y
+ CONFIG_CPU_TLB_V7=y
+ CONFIG_CPU_V7=y
+ CONFIG_CRC16=y
++CONFIG_CRYPTO_DEFLATE=y
++CONFIG_CRYPTO_LZO=y
++CONFIG_CRYPTO_XZ=y
+ CONFIG_DCACHE_WORD_ACCESS=y
+ CONFIG_DEBUG_INFO=y
+ CONFIG_DEBUG_LL=y
+@@ -158,6 +161,8 @@ CONFIG_KTIME_SCALAR=y
+ CONFIG_LEDS_TRIGGER_HEARTBEAT=y
+ CONFIG_LOCAL_TIMERS=y
+ CONFIG_LOG_BUF_SHIFT=14
++CONFIG_LZO_COMPRESS=y
++CONFIG_LZO_DECOMPRESS=y
+ CONFIG_M25PXX_USE_FAST_READ=y
+ CONFIG_MACH_ARMADA_370=y
+ CONFIG_MACH_ARMADA_370_XP=y
+@@ -182,6 +187,11 @@ CONFIG_MTD_PHYSMAP_OF=y
+ # CONFIG_MTD_ROOTFS_SPLIT is not set
+ # CONFIG_MTD_SM_COMMON is not set
+ # CONFIG_MTD_SPLIT is not set
++CONFIG_MTD_UBI=y
++CONFIG_MTD_UBI_BEB_LIMIT=20
++# CONFIG_MTD_UBI_FASTMAP is not set
++# CONFIG_MTD_UBI_GLUEBI is not set
++CONFIG_MTD_UBI_WL_THRESHOLD=4096
+ CONFIG_MULTI_IRQ_HANDLER=y
+ CONFIG_MUTEX_SPIN_ON_OWNER=y
+ CONFIG_MVEBU_CLK_CORE=y
+@@ -274,6 +284,11 @@ CONFIG_THERMAL_HWMON=y
+ CONFIG_TICK_CPU_ACCOUNTING=y
+ CONFIG_TIMER_STATS=y
+ CONFIG_TREE_RCU=y
++CONFIG_UBIFS_FS=y
++CONFIG_UBIFS_FS_ADVANCED_COMPR=y
++CONFIG_UBIFS_FS_LZO=y
++CONFIG_UBIFS_FS_XZ=y
++CONFIG_UBIFS_FS_ZLIB=y
+ CONFIG_UID16=y
+ CONFIG_UIDGID_CONVERTED=y
+ CONFIG_UNCOMPRESS_INCLUDE="debug/uncompress.h"
+@@ -301,4 +316,6 @@ CONFIG_XZ_DEC_ARM=y
+ CONFIG_XZ_DEC_BCJ=y
+ CONFIG_ZBOOT_ROM_BSS=0x0
+ CONFIG_ZBOOT_ROM_TEXT=0x0
++CONFIG_ZLIB_DEFLATE=y
++CONFIG_ZLIB_INFLATE=y
+ CONFIG_ZONE_DMA_FLAG=0
+-- 
+1.7.9.5
+

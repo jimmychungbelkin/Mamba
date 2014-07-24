@@ -1,0 +1,41 @@
+From 0509788c28601d73bfb14bfd76dbb59d1e981c97 Mon Sep 17 00:00:00 2001
+From: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+Date: Sun, 4 May 2014 20:20:54 +0700
+Subject: [PATCH 19/34] mamba mvebu: Reset button activity in normal mode
+
+ - Pressed button 1..10s -> reboot the board.
+ - Pressed button over 10s -> factory reset, then reboot the board.
+
+Signed-off-by: Matthew Fatheree <Matthew.Fatheree@belkin.com>
+---
+ .../linksys-base-files/files/etc/rc.button/reset   |   18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+ create mode 100755 package/linksys-base-files/files/etc/rc.button/reset
+
+diff --git a/package/linksys-base-files/files/etc/rc.button/reset b/package/linksys-base-files/files/etc/rc.button/reset
+new file mode 100755
+index 0000000..d30aae2
+--- /dev/null
++++ b/package/linksys-base-files/files/etc/rc.button/reset
+@@ -0,0 +1,18 @@
++#!/bin/sh
++
++[ "${ACTION}" = "released" ] || exit 0
++
++. /lib/functions.sh
++
++logger "$BUTTON pressed for $SEEN seconds"
++
++if [ "$SEEN" -gt 0 ] && [ "$SEEN" -le 10 ]
++then
++	echo "REBOOT" > /dev/console
++	sync
++	reboot
++elif [ "$SEEN" -gt 0 ]
++then
++	echo "FACTORY RESET" > /dev/console
++	jffs2reset -y && reboot &
++fi
+-- 
+1.7.9.5
+
